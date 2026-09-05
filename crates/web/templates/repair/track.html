@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}پیگیری تعمیر #{{ ticket_fa }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="track-card">
+    <div class="track-head">
+      <div>
+        <span class="muted">شماره پیگیری</span>
+        <h1>#{{ ticket_fa }}</h1>
+      </div>
+      <span class="order-status status-{{ repair.status }}">{{ repair.status_fa() }}</span>
+    </div>
+    <div class="track-info">
+      <div class="info-row"><span class="muted">دستگاه</span><span>{{ repair.device_type }}{% if let Some(b) = repair.brand %} — {{ b }}{% endif %}</span></div>
+      <div class="info-row"><span class="muted">روش سرویس</span><span>{{ repair.method_fa() }}</span></div>
+      <div class="info-row"><span class="muted">مشکل</span><span>{{ repair.problem }}</span></div>
+      {% if let Some(c) = cost_estimate_fa %}<div class="info-row"><span class="muted">برآورد هزینه</span><span>{{ c }}</span></div>{% endif %}
+    </div>
+    <h3>روند پیگیری</h3>
+    <ol class="timeline">
+      {% for h in history %}
+      <li class="timeline-item">
+        <span class="timeline-dot" aria-hidden="true"></span>
+        <div class="timeline-body">
+          <strong>{{ h.status_fa() }}</strong>
+          {% if let Some(n) = h.note %}<p class="muted">{{ n }}</p>{% endif %}
+        </div>
+      </li>
+      {% endfor %}
+    </ol>
+  </div>
+</div>
+{% endblock %}

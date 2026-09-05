@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}دسته‌بندی‌ها — {{ site_name }}{% endblock %}
+{% block description %}مرور همه‌ی دسته‌بندی‌های فروشگاه زاگرس — لوازم برودتی، آشپزخانه و برندهای محبوب.{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ canonical }}">{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <div class="content-hero">
+        <span class="section-eyebrow">فروشگاه</span>
+        <h1>دسته‌بندی‌ها</h1>
+        <p class="lead">دسته‌ی موردنظرتان را انتخاب کنید.</p>
+    </div>
+
+    <div class="cat-accordion" x-data="{ open: null }">
+        {% for c in parents %}
+        <div class="cat-acc-item">
+            <div class="cat-acc-head">
+                <a href="/products?cat={{ c.slug }}" class="cat-acc-title">{{ c.name }}</a>
+                {% if !c.children.is_empty() %}
+                <button type="button" class="cat-acc-toggle" @click="open = (open === {{ loop.index0 }} ? null : {{ loop.index0 }})"
+                        :aria-expanded="open === {{ loop.index0 }}" aria-label="زیردسته‌ها">
+                    <span x-show="open !== {{ loop.index0 }}">+</span><span x-show="open === {{ loop.index0 }}" x-cloak>−</span>
+                </button>
+                {% endif %}
+            </div>
+            {% if !c.children.is_empty() %}
+            <div class="cat-acc-body" x-show="open === {{ loop.index0 }}" x-cloak>
+                {% for sub in c.children %}
+                <a href="/products?cat={{ sub.slug }}" class="cat-acc-sub">{{ sub.name }}</a>
+                {% endfor %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if !brands.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>برندهای محبوب</h2></div></div>
+        <div class="brand-chip-row">
+            {% for b in brands %}
+            <a href="/products?brand={{ b.slug }}" class="brand-chip">{{ b.name }}</a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

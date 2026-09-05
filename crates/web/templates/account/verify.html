@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}تأیید کد — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+    <div class="auth-card">
+        <h1>کد ورود را وارد کنید</h1>
+        <p class="muted">کد پنج‌رقمی به شماره‌ی {{ mobile }} ارسال شد.</p>
+        {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+        <form method="post" action="/account/verify" class="auth-form">
+            <input type="hidden" name="mobile" value="{{ mobile }}">
+            <label for="code">کد تأیید</label>
+            <input type="text" id="code" name="code" class="input otp-input" placeholder="-----"
+                   inputmode="numeric" maxlength="5" autocomplete="one-time-code" required autofocus>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">ورود</button>
+        </form>
+        <div class="resend-row" x-data="{ left: 60 }"
+             x-init="let t = setInterval(() => { if (--left <= 0) clearInterval(t) }, 1000)">
+            <p class="muted resend-wait" x-show="left > 0">
+                ارسال مجدد کد تا <span x-text="left.toLocaleString('fa-IR')"></span> ثانیه دیگر
+            </p>
+            <form method="post" action="/account/login" class="resend-form" x-show="left <= 0" x-cloak>
+                <input type="hidden" name="mobile" value="{{ mobile }}">
+                <button type="submit" class="btn btn-ghost btn-block">ارسال مجدد کد</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

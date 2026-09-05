@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}پرسش‌های متداول — {{ site_name }}{% endblock %}
+{% block description %}پاسخ پرسش‌های متداول درباره‌ی خرید، ارسال، گارانتی و تعمیرات در فروشگاه زاگرس.{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {"@type":"Question","name":"هزینه و زمان ارسال چقدر است؟","acceptedAnswer":{"@type":"Answer","text":"ارسال به سراسر کشور انجام می‌شود. هزینه‌ی ارسال هنگام تسویه‌حساب نمایش داده می‌شود."}},
+    {"@type":"Question","name":"پرداخت در محل دارید؟","acceptedAnswer":{"@type":"Answer","text":"بله، پرداخت در محل ویژه‌ی استان زنجان فعال است."}},
+    {"@type":"Question","name":"گارانتی کالاها چگونه است؟","acceptedAnswer":{"@type":"Answer","text":"همه‌ی کالاها با ضمانت اصالت و گارانتی معتبر عرضه می‌شوند."}}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container section content-page">
+    <div class="content-hero">
+        <span class="section-eyebrow">راهنما</span>
+        <h1>پرسش‌های متداول</h1>
+    </div>
+
+    <div class="faq-list" x-data="{ open: 1 }">
+        <div class="faq-item">
+            <button type="button" class="faq-q" @click="open = open === 1 ? 0 : 1" :aria-expanded="open === 1">هزینه و زمان ارسال چقدر است؟</button>
+            <div class="faq-a" x-show="open === 1">ارسال به سراسر کشور انجام می‌شود. هزینه‌ی ارسال بسته به تنظیمات فروشگاه هنگام تسویه‌حساب به شما نمایش داده می‌شود و زمان تحویل معمولاً ۲ تا ۵ روز کاری است.</div>
+        </div>
+        <div class="faq-item">
+            <button type="button" class="faq-q" @click="open = open === 2 ? 0 : 2" :aria-expanded="open === 2">آیا پرداخت در محل امکان‌پذیر است؟</button>
+            <div class="faq-a" x-show="open === 2">بله. پرداخت در محل (هنگام تحویل) ویژه‌ی استان زنجان فعال است. برای سایر استان‌ها پرداخت آنلاین انجام می‌شود.</div>
+        </div>
+        <div class="faq-item">
+            <button type="button" class="faq-q" @click="open = open === 3 ? 0 : 3" :aria-expanded="open === 3">گارانتی و اصالت کالا چگونه تضمین می‌شود؟</button>
+            <div class="faq-a" x-show="open === 3">تمام کالاها اصل و دارای گارانتی معتبر هستند. در صورت بروز مشکل، خدمات تعمیرات تخصصی ما در دسترس شماست.</div>
+        </div>
+        <div class="faq-item">
+            <button type="button" class="faq-q" @click="open = open === 4 ? 0 : 4" :aria-expanded="open === 4">چطور درخواست تعمیر ثبت کنم؟</button>
+            <div class="faq-a" x-show="open === 4">از صفحه‌ی <a href="/repair">ثبت تعمیر</a> درخواست خود را ثبت کنید؛ کارشناس ما به محل اعزام می‌شود یا دستگاه را در انبار می‌پذیریم. پیگیری وضعیت به‌صورت آنلاین ممکن است.</div>
+        </div>
+        <div class="faq-item">
+            <button type="button" class="faq-q" @click="open = open === 5 ? 0 : 5" :aria-expanded="open === 5">امتیاز باشگاه مشتریان چطور کار می‌کند؟</button>
+            <div class="faq-a" x-show="open === 5">با هر خرید امتیاز می‌گیرید و می‌توانید هنگام تسویه‌حساب از امتیازها برای دریافت تخفیف استفاده کنید. اتصال حساب به ربات تلگرام نیز امتیاز پاداش دارد.</div>
+        </div>
+    </div>
+</div>
+{% endblock %}

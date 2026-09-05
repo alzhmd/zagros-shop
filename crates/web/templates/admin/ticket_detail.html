@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}تیکت #{{ ticket_fa }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>تیکت #{{ ticket_fa }}</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+  <div class="admin-detail-grid">
+    <div class="detail-panel">
+      <h3>{{ ticket.subject }}</h3>
+      <div class="info-row"><span class="muted">مشتری</span><span>{{ ticket.full_name }}{% if let Some(e) = ticket.email %} — {{ e }}{% endif %}</span></div>
+      <div class="info-row"><span class="muted">بخش</span><span>{{ ticket.department_fa() }}</span></div>
+      <div class="info-row"><span class="muted">اولویت</span><span>{{ ticket.priority_fa() }}</span></div>
+      <div class="info-row"><span class="muted">وضعیت</span><span class="order-status status-{{ ticket.status }}">{{ ticket.status_fa() }}</span></div>
+
+      <div class="msg-thread">
+        {% for m in messages %}
+        <div class="msg {% if m.is_staff() %}msg-staff{% else %}msg-customer{% endif %}">
+          <div class="msg-sender">{{ m.sender_fa() }}</div>
+          <div class="msg-body">{{ m.body }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    <div class="detail-panel">
+      <h3>ارسال پاسخ</h3>
+      <form method="post" action="/admin/tickets/{{ ticket.id }}/reply" class="auth-form">
+        <textarea name="body" class="input" rows="4" required placeholder="پاسخ پشتیبانی…"></textarea>
+        <button type="submit" class="btn btn-primary btn-block">ارسال پاسخ</button>
+      </form>
+      <h3 style="margin-top:1.5rem">تغییر وضعیت</h3>
+      <form method="post" action="/admin/tickets/{{ ticket.id }}/status" class="auth-form">
+        <select name="status" class="input">
+          <option value="open">باز</option>
+          <option value="answered">پاسخ داده‌شده</option>
+          <option value="closed">بسته‌شده</option>
+        </select>
+        <button type="submit" class="btn btn-ghost btn-block">ثبت وضعیت</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

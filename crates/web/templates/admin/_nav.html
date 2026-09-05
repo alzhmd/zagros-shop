@@ -1,0 +1,127 @@
+{# سایدبار پنل مدیریت — در همه‌ی صفحات ادمین include می‌شود.
+   با position:fixed به نوار کناری (راست در RTL) تبدیل می‌شود؛ تب فعال با JS مشخص می‌گردد. #}
+<nav id="adminNav" class="admin-sidebar" aria-label="ناوبری مدیریت">
+  <div class="adm-side-head">
+    <a href="/admin" class="adm-brand">
+      <span class="adm-brand-mark">زاگرس</span>
+      <span class="adm-brand-sub">پنل مدیریت</span>
+    </a>
+    <button type="button" class="adm-side-close" aria-label="بستن منو"
+            onclick="document.getElementById('adminNav').classList.remove('is-open')">✕</button>
+  </div>
+
+  <div class="adm-nav">
+    <a href="/admin" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+      <span>داشبورد</span>
+    </a>
+
+    <span class="adm-group">کاتالوگ</span>
+    <a href="/admin/products" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>
+      <span>محصولات</span>
+    </a>
+    <a href="/admin/categories" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+      <span>دسته‌بندی‌ها</span>
+    </a>
+    <a href="/admin/brands" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.6 13.4 11 3.8a2 2 0 0 0-1.4-.6H5a2 2 0 0 0-2 2v4.6a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.8z"/><circle cx="7.5" cy="7.5" r="1.2"/></svg>
+      <span>برندها</span>
+    </a>
+
+    <span class="adm-group">فروش</span>
+    <a href="/admin/orders" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="21" r="1.4"/><circle cx="19" cy="21" r="1.4"/><path d="M1 1h4l2.7 13.4a2 2 0 0 0 2 1.6h9.7a2 2 0 0 0 2-1.6L23 6H6"/></svg>
+      <span>سفارش‌ها</span>
+    </a>
+    <a href="/admin/returns" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.1-9.4L3 7"/></svg>
+      <span>مرجوعی‌ها</span>
+    </a>
+    <a href="/admin/coupons" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 9a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2 2 2 0 0 0 0 4 2 2 0 0 1-2 2H5a2 2 0 0 1-2-2 2 2 0 0 0 0-4z"/><path d="M9 7v10" stroke-dasharray="1.5 2.5"/></svg>
+      <span>کد تخفیف</span>
+    </a>
+    <a href="/admin/giftcards" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="8" width="18" height="13" rx="2"/><path d="M3 12h18M12 8v13"/><path d="M12 8S10 3 7.5 4 9 8 12 8zM12 8s2-5 4.5-4S15 8 12 8z"/></svg>
+      <span>کارت هدیه</span>
+    </a>
+
+    <span class="adm-group">مشتری</span>
+    <a href="/admin/users" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9"/></svg>
+      <span>کاربران</span>
+    </a>
+    <a href="/admin/reviews" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.9 21l1.2-6.8-5-4.9 6.9-1z"/></svg>
+      <span>نظرات</span>
+    </a>
+    <a href="/admin/questions" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      <span>پرسش‌ها</span>
+    </a>
+
+    <span class="adm-group">پشتیبانی</span>
+    <a href="/admin/repairs" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.2 5.2L3 18l3 3 6.5-6.5a4 4 0 0 0 5.2-5.2l-2.8 2.8-2.7-.7-.7-2.7z"/></svg>
+      <span>تعمیرات</span>
+    </a>
+    <a href="/admin/tickets" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span>تیکت‌ها</span>
+    </a>
+    <a href="/admin/chat" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.8L3 21l1.9-4.2A8.4 8.4 0 1 1 21 11.5z"/></svg>
+      <span>گفت‌وگو</span>
+    </a>
+
+    <span class="adm-group">بازاریابی</span>
+    <a href="/admin/banners" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg>
+      <span>بنرها</span>
+    </a>
+    <a href="/admin/notify" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      <span>اعلان همگانی</span>
+    </a>
+
+    <span class="adm-group">سیستم</span>
+    <a href="/admin/settings" class="adm-link">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 0 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.5-1H3a2 2 0 0 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.5V3a2 2 0 0 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.5 1H21a2 2 0 0 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+      <span>تنظیمات</span>
+    </a>
+  </div>
+
+  <div class="adm-side-foot">
+    <a href="/" class="adm-foot-link" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6M10 14 21 3"/></svg>
+      مشاهده‌ی سایت
+    </a>
+    <form method="post" action="/account/logout">
+      <button type="submit" class="adm-foot-link adm-foot-logout">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg>
+        خروج
+      </button>
+    </form>
+  </div>
+</nav>
+
+<button type="button" class="adm-menu-btn" aria-label="منوی مدیریت"
+        onclick="document.getElementById('adminNav').classList.toggle('is-open')">
+  <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+</button>
+
+<script>
+(function () {
+  var path = location.pathname;
+  var links = document.querySelectorAll('#adminNav .adm-link');
+  var best = null, bestLen = -1;
+  links.forEach(function (a) {
+    var href = a.getAttribute('href');
+    var match = href === '/admin' ? path === '/admin' : path.indexOf(href) === 0;
+    if (match && href.length > bestLen) { best = a; bestLen = href.length; }
+  });
+  if (best) best.classList.add('active');
+})();
+</script>

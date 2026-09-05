@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}مرجوعی #{{ ret.number_fa() }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مرجوعی #{{ ret.number_fa() }}</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  <div class="admin-detail-grid">
+    <div class="detail-panel">
+      <h3>اطلاعات مرجوعی</h3>
+      <div class="info-row"><span class="muted">وضعیت</span><span class="order-status status-{{ ret.status }}">{{ ret.status_fa() }}</span></div>
+      <div class="info-row"><span class="muted">دلیل</span><span>{{ ret.reason_fa() }}</span></div>
+      {% if let Some(d) = ret.description %}<div class="info-row"><span class="muted">توضیحات</span><span>{{ d }}</span></div>{% endif %}
+      {% if let Some(o) = order %}<div class="info-row"><span class="muted">سفارش</span><a href="/admin/orders/{{ o.id }}">#{{ o.order_number }}</a></div>{% endif %}
+      {% if let Some(rf) = ret.refund_fa() %}<div class="info-row"><span class="muted">بازپرداخت</span><strong>{{ rf }}</strong></div>{% endif %}
+
+      <h3 style="margin-top:1.5rem">کالاهای مرجوعی</h3>
+      <ul class="order-line-list">
+        {% for it in items %}
+        <li class="order-line">
+          <span>{{ it.product_name }}{% if let Some(v) = it.variant_title %} <small class="muted">— {{ v }}</small>{% endif %} <small class="muted">×{{ it.qty }}</small></span>
+          <span>{{ it.line_total_fa() }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="detail-panel">
+      <h3>تغییر وضعیت / بازپرداخت</h3>
+      <form method="post" action="/admin/returns/{{ ret.id }}" class="auth-form">
+        <label for="status">وضعیت</label>
+        <select id="status" name="status" class="input">
+          {% for st in statuses %}<option value="{{ st.key }}"{% if ret.status == st.key %} selected{% endif %}>{{ st.label }}</option>{% endfor %}
+        </select>
+        <label for="refund_toman">مبلغ بازپرداخت (تومان)</label>
+        <input type="text" id="refund_toman" name="refund_toman" class="input" inputmode="numeric" value="{{ refund_toman }}">
+        <label for="note">یادداشت (برای مشتری در تاریخچه دیده می‌شود)</label>
+        <input type="text" id="note" name="note" class="input">
+        <button type="submit" class="btn btn-primary btn-block">ثبت</button>
+      </form>
+
+      <h3 style="margin-top:1.5rem">تاریخچه</h3>
+      <ol class="timeline">
+        {% for h in history %}
+        <li class="timeline-item">
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <div class="timeline-body"><strong>{{ h.status_fa() }}</strong> <span class="muted">{{ h.date_fa() }}</span>{% if let Some(n) = h.note %}<p class="muted">{{ n }}</p>{% endif %}</div>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+{% endblock %}

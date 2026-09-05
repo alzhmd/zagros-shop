@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}درخواست مرجوعی سفارش #{{ order_number_fa }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width:760px">
+    <nav class="breadcrumb" aria-label="مسیر">
+        <a href="/account/orders">سفارش‌ها</a><span aria-hidden="true">/</span>
+        <a href="/order/{{ order.id }}">سفارش #{{ order_number_fa }}</a><span aria-hidden="true">/</span>
+        <span>مرجوعی</span>
+    </nav>
+    <h1>درخواست مرجوعی</h1>
+    <p class="lead muted">کالاهایی را که می‌خواهید برگردانید انتخاب کنید و دلیل را بنویسید. پس از تأیید کارشناسان، روال بازگشت و بازپرداخت انجام می‌شود.</p>
+
+    <form method="post" action="/order/{{ order.id }}/return" class="repair-form">
+        <div class="form-section">
+            <h3>انتخاب کالاها</h3>
+            <div class="return-items">
+                {% for it in items %}
+                <label class="return-item">
+                    <input type="checkbox" name="item_{{ it.id }}" value="on">
+                    <span class="return-item-name">{{ it.product_name }}{% if let Some(v) = it.variant_title %} <small class="muted">— {{ v }}</small>{% endif %}</span>
+                    <span class="return-item-qty">
+                        تعداد:
+                        <input type="number" name="qty_{{ it.id }}" value="{{ it.qty }}" min="1" max="{{ it.qty }}" class="input input-sm" style="width:70px">
+                        <small class="muted">از {{ it.qty }}</small>
+                    </span>
+                    <span class="muted">{{ it.unit_price_fa() }}</span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>دلیل مرجوعی</h3>
+            <div class="form-field">
+                <label for="reason">دلیل</label>
+                <select id="reason" name="reason" class="input">
+                    {% for r in reasons %}<option value="{{ r.0 }}">{{ r.1 }}</option>{% endfor %}
+                </select>
+            </div>
+            <div class="form-field">
+                <label for="description">توضیحات (اختیاری)</label>
+                <textarea id="description" name="description" class="input" rows="3" placeholder="توضیح مشکل یا دلیل بازگشت…"></textarea>
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-accent btn-lg">ثبت درخواست مرجوعی</button>
+    </form>
+</div>
+{% endblock %}

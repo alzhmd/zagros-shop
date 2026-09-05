@@ -1,0 +1,87 @@
+{% if is_empty %}
+<div class="empty-state">
+    <h3>سبد خرید شما خالی است</h3>
+    <p class="muted">محصولات مورد علاقه‌تان را به سبد اضافه کنید.</p>
+    <a href="/products" class="btn btn-primary">مشاهده‌ی محصولات</a>
+</div>
+{% else %}
+{% if items.is_empty() %}
+<div class="empty-state">
+    <h3>سبد خرید فعال شما خالی است</h3>
+    <p class="muted">اقلام «ذخیره برای بعد» در پایین قرار دارند.</p>
+</div>
+{% else %}
+<div class="cart-layout">
+    <div class="cart-items">
+        {% for it in items %}
+        <div class="cart-item">
+            <a href="/product/{{ it.product_slug }}" class="cart-item-thumb">
+                {% if let Some(img) = it.image %}
+                <img src="{{ img }}" alt="{{ it.product_name }}" width="80" height="80">
+                {% else %}
+                <div class="thumb-mini" aria-hidden="true">زاگرس</div>
+                {% endif %}
+            </a>
+            <div class="cart-item-info">
+                <a href="/product/{{ it.product_slug }}" class="cart-item-name">{{ it.product_name }}</a>
+                <span class="muted">{{ it.variant_title }}</span>
+                <span class="cart-item-unit muted">قیمت واحد: {{ it.unit_price_fa() }}{% if it.has_discount() %} <span class="cart-unit-old">{{ it.compare_line_fa() }}</span>{% endif %}</span>
+            </div>
+            <div class="cart-item-actions">
+                <div class="qty-control">
+                    <button type="submit" name="qty" value="{{ it.qty - 1 }}" class="qty-btn" aria-label="کاهش"
+                            hx-post="/cart/update" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">−</button>
+                    <span class="qty-display">{{ it.qty }}</span>
+                    <button type="submit" name="qty" value="{{ it.qty + 1 }}" class="qty-btn" aria-label="افزایش"
+                            hx-post="/cart/update" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">+</button>
+                </div>
+                <div class="cart-item-total">{{ it.line_total_fa() }}</div>
+                <div class="cart-item-links">
+                    <button type="button" class="cart-link-btn"
+                            hx-post="/cart/save" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">ذخیره برای بعد</button>
+                    <button type="button" class="cart-remove" aria-label="حذف"
+                            hx-post="/cart/remove" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">حذف</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <aside class="cart-summary">
+        <h3>خلاصه‌ی سفارش</h3>
+        <div class="summary-row summary-total">
+            <span>مبلغ قابل پرداخت</span>
+            <strong>{{ total_fa }}</strong>
+        </div>
+        <a href="/checkout" class="btn btn-accent btn-block btn-lg">ادامه‌ی خرید و تسویه</a>
+        <a href="/products" class="btn btn-ghost btn-block">افزودن محصول دیگر</a>
+    </aside>
+</div>
+{% endif %}
+
+{% if !saved.is_empty() %}
+<section class="saved-section">
+    <h2>ذخیره برای بعد</h2>
+    <div class="cart-items">
+        {% for it in saved %}
+        <div class="cart-item">
+            <a href="/product/{{ it.product_slug }}" class="cart-item-thumb">
+                {% if let Some(img) = it.image %}<img src="{{ img }}" alt="{{ it.product_name }}" width="80" height="80">{% else %}<div class="thumb-mini" aria-hidden="true">زاگرس</div>{% endif %}
+            </a>
+            <div class="cart-item-info">
+                <a href="/product/{{ it.product_slug }}" class="cart-item-name">{{ it.product_name }}</a>
+                <span class="muted">{{ it.variant_title }}</span>
+                <span class="cart-item-unit muted">{{ it.unit_price_fa() }}</span>
+            </div>
+            <div class="cart-item-actions">
+                <button type="button" class="btn btn-outline btn-sm"
+                        hx-post="/cart/move-to-cart" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">انتقال به سبد</button>
+                <button type="button" class="cart-remove" aria-label="حذف"
+                        hx-post="/cart/remove" hx-vals='{"item_id":"{{ it.item_id }}"}' hx-target="#cartBody" hx-swap="innerHTML">حذف</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+{% endif %}

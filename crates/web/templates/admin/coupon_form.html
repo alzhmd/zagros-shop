@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}ویرایش کد تخفیف{% else %}کد تخفیف جدید{% endif %} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>{% if is_edit %}ویرایش کد تخفیف{% else %}افزودن کد تخفیف{% endif %}</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+
+  <form method="post" action="{% if is_edit %}/admin/coupons/{{ id }}{% else %}/admin/coupons{% endif %}" class="repair-form">
+    <div class="form-section">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="code">کد (انگلیسی)</label>
+          <input type="text" id="code" name="code" class="input mono" value="{{ code }}" dir="ltr" placeholder="WELCOME10" required>
+        </div>
+        <div class="form-field">
+          <label for="kind">نوع تخفیف</label>
+          <select id="kind" name="kind" class="input" onchange="document.getElementById('valHint').textContent = this.value==='percent' ? 'عدد ۱ تا ۱۰۰ (درصد)' : 'مبلغ به تومان';">
+            <option value="percent"{% if kind == "percent" %} selected{% endif %}>درصدی</option>
+            <option value="fixed"{% if kind == "fixed" %} selected{% endif %}>مبلغ ثابت</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="value">مقدار تخفیف</label>
+          <input type="text" id="value" name="value" class="input" value="{{ value }}" inputmode="numeric" required>
+          <small class="muted" id="valHint">{% if kind == "fixed" %}مبلغ به تومان{% else %}عدد ۱ تا ۱۰۰ (درصد){% endif %}</small>
+        </div>
+        <div class="form-field">
+          <label for="max_discount_toman">سقف تخفیف (تومان، برای درصدی)</label>
+          <input type="text" id="max_discount_toman" name="max_discount_toman" class="input" value="{{ max_discount_toman }}" inputmode="numeric" placeholder="بی‌سقف">
+        </div>
+        <div class="form-field">
+          <label for="min_order_toman">حداقل مبلغ سفارش (تومان)</label>
+          <input type="text" id="min_order_toman" name="min_order_toman" class="input" value="{{ min_order_toman }}" inputmode="numeric">
+        </div>
+        <div class="form-field">
+          <label for="expires_at">تاریخ انقضا (YYYY-MM-DD)</label>
+          <input type="text" id="expires_at" name="expires_at" class="input mono" value="{{ expires_at }}" dir="ltr" placeholder="2026-12-31">
+        </div>
+        <div class="form-field">
+          <label for="usage_limit">سقف استفاده‌ی کل</label>
+          <input type="text" id="usage_limit" name="usage_limit" class="input" value="{{ usage_limit }}" inputmode="numeric" placeholder="نامحدود">
+        </div>
+        <div class="form-field">
+          <label for="per_user_limit">سقف هر کاربر</label>
+          <input type="text" id="per_user_limit" name="per_user_limit" class="input" value="{{ per_user_limit }}" inputmode="numeric">
+        </div>
+        <div class="form-field form-field-full">
+          <label for="description">توضیح (اختیاری)</label>
+          <input type="text" id="description" name="description" class="input" value="{{ description }}">
+        </div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="is_active" value="on"{% if is_active %} checked{% endif %}> فعال</label>
+        {% if is_edit %}<span class="muted">تاکنون {{ used_count }} بار استفاده شده</span>{% endif %}
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-accent btn-lg">{% if is_edit %}ذخیره‌ی تغییرات{% else %}ساخت کد{% endif %}</button>
+      <a href="/admin/coupons" class="btn btn-ghost">انصراف</a>
+    </div>
+  </form>
+
+  {% if is_edit %}
+  <div class="form-section admin-subsection danger-zone">
+    <h3>حذف کد</h3>
+    <form method="post" action="/admin/coupons/{{ id }}/delete" onsubmit="return confirm('از حذف این کد مطمئن هستید؟')">
+      <button type="submit" class="btn btn-danger">حذف کد تخفیف</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

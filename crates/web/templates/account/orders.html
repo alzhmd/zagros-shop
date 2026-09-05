@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% import "account/_order_macros.html" as om %}
+{% block title %}سفارش‌های من — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+    <section class="account-main">
+        <h1>سفارش‌های من</h1>
+        {% if orders.is_empty() %}
+        <div class="empty-state">
+            <h3>هنوز سفارشی ثبت نکرده‌اید</h3>
+            <p class="muted">اولین خرید خود را شروع کنید و امتیاز باشگاه بگیرید.</p>
+            <a href="/products" class="btn btn-primary">شروع خرید</a>
+        </div>
+        {% else %}
+        <div x-data="{ f: 'all' }">
+            <div class="filter-bar" style="margin-bottom:var(--space-4)">
+                <button type="button" class="filter-chip" :class="{active: f==='all'}" @click="f='all'">همه</button>
+                <button type="button" class="filter-chip" :class="{active: f==='active'}" @click="f='active'">در جریان</button>
+                <button type="button" class="filter-chip" :class="{active: f==='delivered'}" @click="f='delivered'">تحویل‌شده</button>
+                <button type="button" class="filter-chip" :class="{active: f==='cancelled'}" @click="f='cancelled'">لغوشده</button>
+            </div>
+            <div class="order-list">
+                {% for o in orders %}
+                <div class="order-card" x-show="f==='all' || f==='{{ o.group() }}'">
+                    <div class="order-card-head">
+                        <div class="ohead-l">
+                            <span class="order-number">سفارش #{{ o.order_number }}</span>
+                            <span class="order-status status-{{ o.status }}">{{ o.status_fa() }}</span>
+                        </div>
+                        <div class="ohead-r">
+                            <span class="order-card-when">{{ o.created_relative_fa() }}</span>
+                            <span class="order-total">{{ o.total_fa() }}</span>
+                        </div>
+                    </div>
+                    {% call om::steps(o) %}
+                    {% call om::actions(o) %}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

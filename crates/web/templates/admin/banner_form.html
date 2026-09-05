@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}ویرایش بنر{% else %}بنر جدید{% endif %} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>{% if is_edit %}ویرایش بنر{% else %}افزودن بنر{% endif %}</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  <form method="post" action="{% if is_edit %}/admin/banners/{{ id }}{% else %}/admin/banners{% endif %}" class="repair-form" style="max-width:640px">
+    <div class="form-grid">
+      <div class="form-field">
+        <label for="placement">جایگاه</label>
+        <select id="placement" name="placement" class="input">
+          <option value="hero"{% if placement == "hero" %} selected{% endif %}>اسلایدر اصلی (hero)</option>
+          <option value="strip"{% if placement == "strip" %} selected{% endif %}>نوار تبلیغ (strip)</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label for="sort_order">ترتیب</label>
+        <input type="number" id="sort_order" name="sort_order" class="input" value="{{ sort_order }}">
+      </div>
+      <div class="form-field form-field-full">
+        <label for="title">عنوان</label>
+        <input type="text" id="title" name="title" class="input" value="{{ title }}">
+      </div>
+      <div class="form-field form-field-full">
+        <label for="subtitle">زیرعنوان</label>
+        <input type="text" id="subtitle" name="subtitle" class="input" value="{{ subtitle }}">
+      </div>
+      <div class="form-field">
+        <label for="link">لینک مقصد</label>
+        <input type="text" id="link" name="link" class="input mono" dir="ltr" value="{{ link }}" placeholder="/products">
+      </div>
+      <div class="form-field">
+        <label for="cta_label">متن دکمه</label>
+        <input type="text" id="cta_label" name="cta_label" class="input" value="{{ cta_label }}">
+      </div>
+      <div class="form-field form-field-full">
+        <label for="image_path">مسیر تصویر (اختیاری)</label>
+        <input type="text" id="image_path" name="image_path" class="input mono" dir="ltr" value="{{ image_path }}" placeholder="/assets/uploads/...">
+      </div>
+    </div>
+    <label class="check-inline"><input type="checkbox" name="is_active" value="on"{% if is_active %} checked{% endif %}> فعال</label>
+    <div class="form-actions">
+      <button type="submit" class="btn btn-accent btn-lg">{% if is_edit %}ذخیره{% else %}افزودن{% endif %}</button>
+      <a href="/admin/banners" class="btn btn-ghost">انصراف</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

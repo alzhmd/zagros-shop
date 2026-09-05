@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}مدیریت کد تخفیف — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>کدهای تخفیف</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <span class="muted">{{ coupons.len() }} کد</span>
+    <a href="/admin/coupons/new" class="btn btn-accent">افزودن کد</a>
+  </div>
+
+  {% if coupons.is_empty() %}
+  <div class="empty-state">
+    <h3>کد تخفیفی ثبت نشده است</h3>
+    <a href="/admin/coupons/new" class="btn btn-primary">افزودن نخستین کد</a>
+  </div>
+  {% else %}
+  <table class="admin-table">
+    <thead>
+      <tr><th>کد</th><th>تخفیف</th><th>حداقل سفارش</th><th>استفاده</th><th>انقضا</th><th>وضعیت</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for c in coupons %}
+      <tr>
+        <td><span class="mono">{{ c.code }}</span>{% if let Some(d) = c.description %}<br><span class="muted">{{ d }}</span>{% endif %}</td>
+        <td>{{ c.value_display() }}</td>
+        <td>{% if c.min_order > 0 %}{{ c.min_order_fa() }}{% else %}—{% endif %}</td>
+        <td>{{ c.used_count }}{% if let Some(l) = c.usage_limit %} / {{ l }}{% endif %}</td>
+        <td>{% if let Some(e) = c.expires_at %}<span class="mono">{{ e.format("%Y-%m-%d") }}</span>{% if c.is_expired() %} <span class="badge badge-out">منقضی</span>{% endif %}{% else %}بی‌انقضا{% endif %}</td>
+        <td>{% if c.is_active %}<span class="order-status status-active">فعال</span>{% else %}<span class="order-status status-closed">غیرفعال</span>{% endif %}</td>
+        <td class="row-actions">
+          <a href="/admin/coupons/{{ c.id }}/edit" class="btn btn-ghost">ویرایش</a>
+          <form method="post" action="/admin/coupons/{{ c.id }}/active" class="inline-form">
+            <input type="hidden" name="value" value="{% if c.is_active %}0{% else %}1{% endif %}">
+            <button type="submit" class="btn btn-ghost">{% if c.is_active %}غیرفعال{% else %}فعال{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

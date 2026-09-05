@@ -1,0 +1,52 @@
+# systemd unit برای اپ زاگرس — یک باینری (وب + ورکر + ربات تلگرام).
+# نصب:
+#   sudo cp deploy/zagros.service /etc/systemd/system/zagros.service
+#   sudo systemctl daemon-reload && sudo systemctl enable --now zagros
+# لاگ:  journalctl -u zagros -f
+
+[Unit]
+Description=Zagros - Jahan Koolak (فروشگاه و خدمات زاگرس)
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+# محدودیت نرخ راه‌اندازی مجدد (در systemd جدید باید در بخش [Unit] باشد).
+StartLimitIntervalSec=60
+StartLimitBurst=5
+
+[Service]
+Type=simple
+# کاربر کم‌دسترسی بسازید: sudo useradd -r -s /usr/sbin/nologin zagros
+User=zagros
+Group=zagros
+WorkingDirectory=/opt/zagros
+# باینری منتشرشده + پوشه‌های config/ و assets/ و migrations/ باید کنارش باشند.
+ExecStart=/opt/zagros/web
+
+# پیکربندی از فایل محیطی (راز‌ها اینجا، خارج از مخزن):
+#   /opt/zagros/zagros.env شامل ZAGROS__SERVER__COOKIE_SECRET، ZAGROS__TELEGRAM__TOKEN، DATABASE_URL، ...
+EnvironmentFile=/opt/zagros/zagros.env
+Environment=RUST_LOG=info,sqlx=warn
+
+# راه‌اندازی مجدد خودکار (مقاوم در برابر خطا/قطعی).
+Restart=on-failure
+RestartSec=3
+
+# سخت‌سازی امنیتی (محیط کم‌منبع، تک‌پروسه).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+# اپ فقط برای نوشتن آپلودها/کش به این مسیرها نیاز دارد (در صورت نیاز):
+ReadWritePaths=/opt/zagros/assets
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+MemoryDenyWriteExecute=true
+
+# سقف منابع (سرور ۳.۸ گیگ؛ از فشار حافظه جلوگیری می‌کند).
+MemoryMax=1G
+MemoryHigh=768M
+
+[Install]
+WantedBy=multi-user.target

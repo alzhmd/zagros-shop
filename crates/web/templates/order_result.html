@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}سفارش #{{ order_number_fa }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <div class="order-result">
+        {% if paid %}
+        <div class="result-icon result-success" aria-hidden="true">✓</div>
+        <h1>پرداخت موفق بود</h1>
+        <p class="lead">سفارش شما با موفقیت ثبت و پرداخت شد.</p>
+        {% else if is_cod %}
+        <div class="result-icon result-pending" aria-hidden="true">⏱</div>
+        <h1>سفارش ثبت شد</h1>
+        <p class="lead">سفارش شما با روش «پرداخت در محل» ثبت شد. هنگام تحویل پرداخت می‌کنید.</p>
+        {% else %}
+        <div class="result-icon result-pending" aria-hidden="true">⏱</div>
+        <h1>سفارش در انتظار پرداخت</h1>
+        <p class="lead">سفارش ثبت شد اما پرداخت تکمیل نشده است.</p>
+        {% endif %}
+
+        {% if cancelled %}
+        <div class="alert alert-error" style="text-align:center">این سفارش لغو شده است.</div>
+        {% else %}
+        <ol class="order-timeline" aria-label="مراحل سفارش">
+            {% for step in timeline %}
+            <li class="otl-step otl-{{ step.state }}">
+                <span class="otl-dot" aria-hidden="true">{% if step.state == "done" %}✓{% endif %}</span>
+                <span class="otl-label">{{ step.label }}</span>
+            </li>
+            {% endfor %}
+        </ol>
+        {% endif %}
+
+        <div class="order-card">
+            <div class="order-card-row">
+                <span class="muted">شماره سفارش</span>
+                <strong>#{{ order_number_fa }}</strong>
+            </div>
+            <div class="order-card-row">
+                <span class="muted">وضعیت</span>
+                <span class="order-status status-{{ order.status }}">{{ order.status_fa() }}</span>
+            </div>
+
+            {% if !items.is_empty() %}
+            <div class="order-items-detail">
+                <h3>اقلام سفارش</h3>
+                <ul class="order-line-list">
+                    {% for it in items %}
+                    <li class="order-line">
+                        <span class="order-line-name">
+                            {% if let Some(slug) = it.product_slug %}<a href="/product/{{ slug }}">{{ it.product_name }}</a>{% else %}{{ it.product_name }}{% endif %}
+                            {% if let Some(vt) = it.variant_title %}<small class="muted"> — {{ vt }}</small>{% endif %}
+                            <small class="muted"> ×{{ it.qty }}</small>
+                        </span>
+                        <span>{{ it.line_total_fa() }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <div class="order-card-row">
+                <span class="muted">مبلغ اقلام</span>
+                <span>{{ order.subtotal_fa() }}</span>
+            </div>
+            {% if order.discount > 0 %}
+            <div class="order-card-row">
+                <span class="muted">تخفیف</span>
+                <span>− {{ order.discount_fa() }}</span>
+            </div>
+            {% endif %}
+            <div class="order-card-row">
+                <span class="muted">هزینه‌ی ارسال{% if let Some(sm) = order.shipping_method %} <small>({{ sm }})</small>{% endif %}</span>
+                <span>{{ order.shipping_fa() }}</span>
+            </div>
+            <div class="order-card-row">
+                <span class="muted">مبلغ کل</span>
+                <strong>{{ order.total_fa() }}</strong>
+            </div>
+            {% if let Some(addr) = order.ship_address %}
+            <div class="order-card-row">
+                <span class="muted">نشانی</span>
+                <span>{% if let Some(city) = order.ship_city %}{{ city }}، {% endif %}{{ addr }}</span>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="order-actions">
+            <form method="post" action="/order/{{ order.id }}/reorder" style="display:inline">
+                <button type="submit" class="btn btn-primary">سفارش مجدد</button>
+            </form>
+            <a href="/account/orders" class="btn btn-outline">سفارش‌های من</a>
+            <a href="/order/{{ order.id }}/invoice" class="btn btn-outline" target="_blank">فاکتور</a>
+            {% if can_return %}
+            <a href="/order/{{ order.id }}/return" class="btn btn-outline">درخواست مرجوعی</a>
+            {% endif %}
+            {% if can_cancel %}
+            <form method="post" action="/order/{{ order.id }}/cancel" style="display:inline"
+                  onsubmit="return confirm('از لغو این سفارش مطمئن هستید؟')">
+                <button type="submit" class="btn btn-ghost btn-danger">لغو سفارش</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

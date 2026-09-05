@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}سبد خرید — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h1>سبد خرید</h1>
+    <div id="cartBody" hx-on::after-swap="htmx.trigger(document.body,'cart-changed')">
+        {% include "partials/cart_body.html" %}
+    </div>
+
+    {% if !suggested.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>شاید این‌ها را هم بخواهید</h2></div></div>
+        <div class="product-grid">
+            {% for p in suggested %}{% include "partials/product_card.html" %}{% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if !recent.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>بازدیدهای اخیر شما</h2></div></div>
+        <div class="product-grid">
+            {% for p in recent %}{% include "partials/product_card.html" %}{% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

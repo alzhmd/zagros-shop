@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}ویرایش دسته{% else %}دسته‌ی جدید{% endif %} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>{% if is_edit %}ویرایش دسته{% else %}افزودن دسته{% endif %}</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+
+  {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+
+  <form method="post" action="{% if is_edit %}/admin/categories/{{ id }}{% else %}/admin/categories{% endif %}" class="repair-form">
+    <div class="form-section">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="name">نام دسته</label>
+          <input type="text" id="name" name="name" class="input" value="{{ name }}" required>
+        </div>
+        <div class="form-field">
+          <label for="slug">نامک (slug انگلیسی)</label>
+          <input type="text" id="slug" name="slug" class="input mono" value="{{ slug }}" dir="ltr"
+                 placeholder="yakhchal-freezer" required>
+        </div>
+        <div class="form-field">
+          <label for="parent_id">دسته‌ی والد</label>
+          <select id="parent_id" name="parent_id" class="input">
+            <option value="">— ریشه (بدون والد) —</option>
+            {% for c in parent_options %}
+            <option value="{{ c.id }}"{% if parent_id == c.id.to_string() %} selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="sort_order">ترتیب نمایش</label>
+          <input type="text" id="sort_order" name="sort_order" class="input" value="{{ sort_order }}" inputmode="numeric">
+        </div>
+        <div class="form-field">
+          <label for="icon">آیکون (اختیاری)</label>
+          <input type="text" id="icon" name="icon" class="input" value="{{ icon }}" dir="ltr" placeholder="نام/مسیر آیکون">
+        </div>
+        <div class="form-field form-field-full">
+          <label for="description">توضیح (اختیاری)</label>
+          <textarea id="description" name="description" class="input" rows="3">{{ description }}</textarea>
+        </div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="is_active" value="on"{% if is_active %} checked{% endif %}> فعال (نمایش در فروشگاه)</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-accent btn-lg">{% if is_edit %}ذخیره‌ی تغییرات{% else %}ساخت دسته{% endif %}</button>
+      <a href="/admin/categories" class="btn btn-ghost">انصراف</a>
+    </div>
+  </form>
+
+  {% if is_edit %}
+  <div class="form-section admin-subsection danger-zone">
+    <h3>حذف دسته</h3>
+    <p class="muted">با حذف دسته، محصولات و زیردسته‌های آن حذف نمی‌شوند؛ فقط بدون دسته/والد می‌شوند.</p>
+    <form method="post" action="/admin/categories/{{ id }}/delete" onsubmit="return confirm('از حذف این دسته مطمئن هستید؟')">
+      <button type="submit" class="btn btn-danger">حذف دسته</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

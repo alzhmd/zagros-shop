@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}اعلان همگانی — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>اعلان همگانی</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  {% if let Some(m) = sent %}<div class="alert alert-success">{{ m }}</div>{% endif %}
+  <p class="muted">این اعلان برای همه‌ی مشتریان فعال ارسال می‌شود (در زنگ اعلان نمایش داده می‌شود).</p>
+  <form method="post" action="/admin/notify" class="repair-form" style="max-width:560px">
+    <div class="form-field">
+      <label for="title">عنوان</label>
+      <input type="text" id="title" name="title" class="input" required placeholder="مثلاً: جشنواره‌ی تخفیف برودتی">
+    </div>
+    <div class="form-field">
+      <label for="body">متن (اختیاری)</label>
+      <textarea id="body" name="body" class="input" rows="3"></textarea>
+    </div>
+    <div class="form-field">
+      <label for="url">لینک (اختیاری)</label>
+      <input type="text" id="url" name="url" class="input mono" dir="ltr" placeholder="/offers">
+    </div>
+    <button type="submit" class="btn btn-accent btn-lg" onclick="return confirm('ارسال اعلان برای همه‌ی مشتریان؟')">ارسال همگانی</button>
+  </form>
+</div>
+{% endblock %}

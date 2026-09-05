@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}مدیریت برندها — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت برندها</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <span class="muted">{{ brands.len() }} برند</span>
+    <a href="/admin/brands/new" class="btn btn-accent">افزودن برند</a>
+  </div>
+
+  {% if brands.is_empty() %}
+  <div class="empty-state">
+    <h3>برندی ثبت نشده است</h3>
+    <a href="/admin/brands/new" class="btn btn-primary">افزودن نخستین برند</a>
+  </div>
+  {% else %}
+  <table class="admin-table">
+    <thead>
+      <tr><th>نام</th><th>نامک</th><th>محصولات</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for b in brands %}
+      <tr>
+        <td><a href="/admin/brands/{{ b.id }}/edit" class="prod-name-link">{{ b.name }}</a></td>
+        <td><span class="muted mono">{{ b.slug }}</span></td>
+        <td>{{ b.product_count }}</td>
+        <td class="row-actions">
+          <a href="/admin/brands/{{ b.id }}/edit" class="btn btn-ghost">ویرایش</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% import "account/_order_macros.html" as om %}
+{% block title %}حساب کاربری — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <!-- هیروی هوشمند: سلام + تکمیل پروفایل + سطح باشگاه -->
+        <div class="acct-hero">
+            <div class="acct-hero-id">
+                <div class="account-avatar acct-hero-avatar" aria-hidden="true">ز</div>
+                <div>
+                    <h1 class="acct-hero-hi">سلام{% if let Some(n) = user.full_name %}، {{ n }}{% endif %} 👋</h1>
+                    <p class="muted">خلاصه‌ی حساب شما در یک نگاه</p>
+                </div>
+            </div>
+            <div class="acct-hero-meta">
+                <a href="/account/profile" class="acct-ring-wrap" title="تکمیل پروفایل">
+                    <span class="acct-ring" style="--p: {{ profile_pct }}"><span>{{ profile_pct_fa }}٪</span></span>
+                    <span class="acct-ring-label">تکمیل پروفایل</span>
+                </a>
+                <a href="/account/club" class="acct-tier tier-{{ tier_key }}">
+                    <span class="acct-tier-name">★ {{ tier }}</span>
+                    {% if let Some(next) = tier_next %}
+                    <span class="acct-tier-bar"><i style="width: {{ progress_pct }}%"></i></span>
+                    <span class="acct-tier-hint">{{ to_next_fa }} امتیاز تا {{ next }}</span>
+                    {% else %}
+                    <span class="acct-tier-hint">بالاترین سطح 🎉</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+
+        <!-- نیازمند توجه: جدیدترین سفارشِ در جریان -->
+        {% if let Some(o) = active_order %}
+        <a href="/order/{{ o.id }}" class="acct-alert">
+            <span class="acct-alert-ico">⚡</span>
+            <div class="acct-alert-body">
+                <strong>سفارش #{{ o.order_number }} — {{ o.status_fa() }}</strong>
+                {% call om::steps(o) %}
+            </div>
+            <span class="acct-alert-cta">رهگیری ›</span>
+        </a>
+        {% endif %}
+
+        <!-- کارت‌های آماری -->
+        <div class="account-cards">
+            <a href="/account/orders" class="acct-stat">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg></span>
+                <span class="acct-stat-body"><b>{{ order_count_fa }}</b><small>سفارش</small></span>
+            </a>
+            <a href="/account/returns" class="acct-stat">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7v6h6"/><path d="M3.5 13a9 9 0 1 0 2.3-9.3"/></svg></span>
+                <span class="acct-stat-body"><b>{{ return_count_fa }}</b><small>مرجوعی</small></span>
+            </a>
+            <a href="/account/repairs" class="acct-stat">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 1-5 5L4 17l3 3 5.7-5.7a4 4 0 0 1 5-5l-2.8-2.8z"/></svg></span>
+                <span class="acct-stat-body"><b>{{ repair_count_fa }}</b><small>تعمیر</small></span>
+            </a>
+            <a href="/account/wishlist" class="acct-stat">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 8.4c0 4-8 9-8 9s-8-5-8-9a4.4 4.4 0 0 1 8-2.6 4.4 4.4 0 0 1 8 2.6z"/></svg></span>
+                <span class="acct-stat-body"><b>{{ wishlist_count_fa }}</b><small>علاقه‌مندی</small></span>
+            </a>
+            <a href="/account/addresses" class="acct-stat">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6 7-11a7 7 0 1 0-14 0c0 5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>
+                <span class="acct-stat-body"><b>{{ address_count_fa }}</b><small>آدرس</small></span>
+            </a>
+            <a href="/account/club" class="acct-stat is-points">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 18.8 6.1 21.9l1.1-6.5L2.5 9.8l6.5-.9z"/></svg></span>
+                <span class="acct-stat-body"><b>{{ points_fa }}</b><small>امتیاز باشگاه</small></span>
+            </a>
+            <a href="/account/wallet" class="acct-stat is-wallet">
+                <span class="acct-stat-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M16 12.5h3.5"/></svg></span>
+                <span class="acct-stat-body"><b>{{ wallet_fa }}</b><small>کیف پول</small></span>
+            </a>
+        </div>
+
+        <!-- سفارش‌های اخیر -->
+        <div class="section-head" style="margin-top:var(--space-8)">
+            <div><h2>سفارش‌های اخیر</h2></div>
+            <a href="/account/orders" class="link-more">همه</a>
+        </div>
+        {% if recent_orders.is_empty() %}
+        <div class="empty-state">
+            <h3>هنوز سفارشی ثبت نکرده‌اید</h3>
+            <p class="muted">اولین خرید خود را شروع کنید و امتیاز باشگاه بگیرید.</p>
+            <a href="/products" class="btn btn-primary">شروع خرید</a>
+        </div>
+        {% else %}
+        <div class="order-list">
+            {% for o in recent_orders %}
+            <div class="order-card">
+                <div class="order-card-head">
+                    <div class="ohead-l">
+                        <span class="order-number">سفارش #{{ o.order_number }}</span>
+                        <span class="order-status status-{{ o.status }}">{{ o.status_fa() }}</span>
+                    </div>
+                    <div class="ohead-r">
+                        <span class="order-card-when">{{ o.created_relative_fa() }}</span>
+                        <span class="order-total">{{ o.total_fa() }}</span>
+                    </div>
+                </div>
+                {% call om::steps(o) %}
+                {% call om::actions(o) %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

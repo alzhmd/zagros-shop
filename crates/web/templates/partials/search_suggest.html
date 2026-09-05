@@ -1,0 +1,20 @@
+{% if !products.is_empty() %}
+<ul class="search-suggest-list">
+    {% for p in products %}
+    <li>
+        <a href="/product/{{ p.slug }}" class="search-suggest-item">
+            {% if let Some(img) = p.primary_image %}
+            <img src="{{ img }}" alt="" width="40" height="40" loading="lazy">
+            {% else %}
+            <span class="search-suggest-thumb" aria-hidden="true">ز</span>
+            {% endif %}
+            <span class="search-suggest-name">{{ p.name }}</span>
+            <span class="search-suggest-price muted">{{ p.price_fa() }}</span>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+<a href="/products?q={{ q }}" class="search-suggest-all">دیدن همه‌ی نتایج برای «{{ q }}»</a>
+{% else %}
+<div class="search-suggest-empty muted">نتیجه‌ای یافت نشد</div>
+{% endif %}

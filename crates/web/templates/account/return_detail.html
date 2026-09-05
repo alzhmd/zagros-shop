@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}مرجوعی #{{ ret.number_fa() }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section" style="max-width:760px">
+    <nav class="breadcrumb" aria-label="مسیر">
+        <a href="/account/returns">مرجوعی‌ها</a><span aria-hidden="true">/</span>
+        <span>#{{ ret.number_fa() }}</span>
+    </nav>
+
+    <div class="order-result">
+        <h1>مرجوعی #{{ ret.number_fa() }}</h1>
+        <span class="order-status status-{{ ret.status }}">{{ ret.status_fa() }}</span>
+
+        <ol class="timeline" style="margin-top:1.5rem">
+            {% for h in history %}
+            <li class="timeline-item">
+                <span class="timeline-dot" aria-hidden="true"></span>
+                <div class="timeline-body">
+                    <strong>{{ h.status_fa() }}</strong>
+                    <span class="muted"> — {{ h.date_fa() }}</span>
+                    {% if let Some(n) = h.note %}<p class="muted">{{ n }}</p>{% endif %}
+                </div>
+            </li>
+            {% endfor %}
+        </ol>
+
+        <div class="order-card">
+            <div class="order-card-row"><span class="muted">دلیل</span><span>{{ ret.reason_fa() }}</span></div>
+            {% if let Some(d) = ret.description %}<div class="order-card-row"><span class="muted">توضیحات</span><span>{{ d }}</span></div>{% endif %}
+            {% if let Some(rf) = ret.refund_fa() %}<div class="order-card-row"><span class="muted">مبلغ بازپرداخت</span><strong>{{ rf }}</strong></div>{% endif %}
+            <div class="order-items-detail">
+                <h3>کالاهای مرجوعی</h3>
+                <ul class="order-line-list">
+                    {% for it in items %}
+                    <li class="order-line">
+                        <span>{{ it.product_name }}{% if let Some(v) = it.variant_title %} <small class="muted">— {{ v }}</small>{% endif %} <small class="muted">×{{ it.qty }}</small></span>
+                        <span>{{ it.line_total_fa() }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="order-actions">
+            <a href="/account/returns" class="btn btn-outline">همه‌ی مرجوعی‌ها</a>
+            {% if ret.status == "requested" %}
+            <form method="post" action="/return/cancel" onsubmit="return confirm('لغو این درخواست مرجوعی؟')">
+                <input type="hidden" name="id" value="{{ ret.id }}">
+                <button type="submit" class="btn btn-ghost btn-danger">لغو درخواست</button>
+            </form>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

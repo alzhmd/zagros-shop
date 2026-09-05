@@ -1,0 +1,97 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/web",
+    "crates/domain",
+    "crates/db",
+    "crates/payments",
+    "crates/sms",
+    "crates/bot",
+]
+# crateهای زیر در فازهای بعدی فعال می‌شوند (search و jobs در فاز ۶)
+# "crates/search", "crates/jobs"
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+license = "MIT"
+
+[workspace.dependencies]
+# --- Web framework + runtime ---
+axum = { version = "0.8", features = ["ws", "macros", "multipart"] }
+axum-extra = { version = "0.12", features = ["typed-header", "cookie", "cookie-signed", "form"] }
+tokio = { version = "1", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["fs", "compression-br", "compression-gzip", "trace", "limit", "set-header"] }
+hyper = "1"
+
+# --- Database (Postgres, compile-time checked) ---
+sqlx = { version = "0.8", default-features = false, features = [
+    "runtime-tokio", "tls-rustls-ring-webpki", "postgres",
+    "macros", "migrate", "chrono", "uuid", "json", "rust_decimal",
+] }
+
+# --- Templating (SSR + HTMX, RTL Persian) ---
+askama = "0.12"
+
+# --- Sessions / auth ---
+tower-sessions = "0.13"
+tower-sessions-sqlx-store = { version = "0.14", features = ["postgres"] }
+argon2 = "0.5"
+password-hash = "0.5"
+
+# --- Background jobs (Postgres-backed) ---
+apalis = { version = "0.6", features = ["limit", "retry"] }
+apalis-sql = { version = "0.6", features = ["postgres"] }
+
+# --- Validation ---
+validator = { version = "0.18", features = ["derive"] }
+
+# --- Email ---
+lettre = { version = "0.11", default-features = false, features = [
+    "tokio1", "tokio1-rustls", "ring", "webpki-roots", "smtp-transport", "builder",
+] }
+
+# --- HTTP client (for payment/SMS gateways) ---
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+
+# --- Image processing ---
+image = { version = "0.25", features = ["webp"] }
+
+# --- Caching ---
+moka = { version = "0.12", features = ["future"] }
+
+# --- Search ---
+meilisearch-sdk = "0.27"
+
+# --- Telegram bot ---
+teloxide = { version = "0.13", features = ["macros"] }
+
+# --- Common ---
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+rust_decimal = { version = "1", features = ["serde"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1"
+thiserror = "1"
+config = { version = "0.14", default-features = false, features = ["toml"] }
+time = "0.3"
+async-trait = "0.1"
+slug = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+strip = true
+panic = "abort"
+
+# پروفایل توسعه: کامپایل سریع‌تر + دیسک کمتر روی سرور تک‌هسته
+[profile.dev]
+opt-level = 0
+debug = "line-tables-only"
+incremental = true

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}پرداخت ناموفق — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <div class="order-result">
+        <div class="result-icon result-failed" aria-hidden="true">✕</div>
+        <h1>پرداخت ناموفق بود</h1>
+        <p class="lead">متأسفانه پرداخت تکمیل نشد. اگر مبلغی کسر شده، طی ۷۲ ساعت بازمی‌گردد.</p>
+        <div class="order-actions">
+            <a href="/cart" class="btn btn-primary">بازگشت به سبد</a>
+            <a href="/support" class="btn btn-outline">تماس با پشتیبانی</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

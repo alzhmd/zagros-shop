@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}علاقه‌مندی‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>علاقه‌مندی‌ها</h1>
+        {% if products.is_empty() %}
+        <div class="empty-state">
+            <h3>لیست علاقه‌مندی شما خالی است</h3>
+            <p class="muted">محصولاتی که دوست دارید را با ♡ ذخیره کنید.</p>
+            <a href="/products" class="btn btn-primary">مشاهده‌ی محصولات</a>
+        </div>
+        {% else %}
+        <div class="product-grid">
+            {% for p in products %}
+            <article class="product-card">
+                <a href="/product/{{ p.slug }}" class="product-card-link">
+                    <div class="product-thumb">
+                        {% if let Some(img) = p.primary_image %}
+                        <img src="{{ img }}" alt="{{ p.name }}" loading="lazy" width="300" height="300">
+                        {% else %}
+                        <div class="product-thumb-placeholder" aria-hidden="true">زاگرس</div>
+                        {% endif %}
+                        {% if !p.in_stock %}<span class="badge badge-out">ناموجود</span>{% endif %}
+                    </div>
+                    <div class="product-card-body">
+                        {% if let Some(brand) = p.brand_name %}<span class="product-brand">{{ brand }}</span>{% endif %}
+                        <h3 class="product-name">{{ p.name }}</h3>
+                        <div class="product-price">{{ p.price_fa() }}</div>
+                    </div>
+                </a>
+                <form method="post" action="/wishlist/toggle" hx-post="/wishlist/toggle" hx-swap="outerHTML" class="wishlist-form">
+                    <input type="hidden" name="product_id" value="{{ p.id }}">
+                    <button type="submit" class="btn btn-ghost btn-sm btn-block">حذف از علاقه‌مندی‌ها</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

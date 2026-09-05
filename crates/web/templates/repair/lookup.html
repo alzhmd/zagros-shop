@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}پیگیری درخواست تعمیر — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+  <div class="auth-card">
+    <h1>پیگیری درخواست تعمیر</h1>
+    <p class="muted">شماره پیگیری خود را وارد کنید.</p>
+    <form method="post" action="/repair/track" class="auth-form">
+      <label for="ticket">شماره پیگیری</label>
+      <input type="text" id="ticket" name="ticket" class="input" inputmode="numeric" required autofocus>
+      <button type="submit" class="btn btn-primary btn-block btn-lg">پیگیری</button>
+    </form>
+    <p class="auth-note"><a href="/repair">ثبت درخواست جدید</a></p>
+  </div>
+</div>
+{% endblock %}

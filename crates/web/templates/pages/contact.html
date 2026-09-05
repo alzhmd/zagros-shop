@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}تماس با ما — {{ site_name }}{% endblock %}
+{% block description %}راه‌های ارتباط با فروشگاه زاگرس — تلفن، نشانی و پشتیبانی آنلاین.{% endblock %}
+
+{% block content %}
+<div class="container section content-page">
+    <div class="content-hero">
+        <span class="section-eyebrow">ارتباط با ما</span>
+        <h1>تماس با زاگرس</h1>
+        <p class="lead">برای مشاوره‌ی خرید، پیگیری سفارش یا خدمات تعمیرات با ما در ارتباط باشید.</p>
+    </div>
+
+    <div class="content-grid">
+        <section class="contact-card">
+            <h2>تلفن</h2>
+            {% if !contact_phone.is_empty() %}
+            <p><a href="tel:{{ contact_phone }}" dir="ltr" class="contact-big">{{ contact_phone }}</a></p>
+            {% else %}
+            <p class="muted">به‌زودی</p>
+            {% endif %}
+        </section>
+        <section class="contact-card">
+            <h2>نشانی</h2>
+            <p>{{ contact_address }}</p>
+        </section>
+        <section class="contact-card">
+            <h2>پشتیبانی آنلاین</h2>
+            <p>سریع‌ترین راه ارتباط، گفت‌وگوی زنده یا ثبت تیکت است.</p>
+            <div class="hero-cta">
+                <a href="/support/chat" class="btn btn-accent">گفت‌وگوی زنده</a>
+                <a href="/support" class="btn btn-outline">ثبت تیکت</a>
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

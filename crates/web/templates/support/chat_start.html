@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}گفت‌وگوی زنده — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+  <div class="auth-card">
+    <h1>گفت‌وگوی زنده با پشتیبانی</h1>
+    <p class="muted">برای شروع، نام خود را وارد کنید؛ کارشناس ما در سریع‌ترین زمان پاسخ می‌دهد.</p>
+    <form method="post" action="/support/chat" class="auth-form">
+      <label for="guest_name">نام شما</label>
+      <input type="text" id="guest_name" name="guest_name" class="input" value="{{ prefill_name }}"
+             placeholder="نام شما"{% if !logged_in %} required{% endif %} autofocus>
+      <button type="submit" class="btn btn-accent btn-block btn-lg">شروع گفت‌وگو</button>
+    </form>
+    <p class="auth-note muted">ترجیح می‌دهید پیام بنویسید؟ <a href="/support">تیکت ثبت کنید</a>.</p>
+  </div>
+</div>
+{% endblock %}

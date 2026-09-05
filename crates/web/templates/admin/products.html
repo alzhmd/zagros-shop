@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}مدیریت محصولات — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت محصولات</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <form method="get" action="/admin/products" class="admin-search">
+      <input type="search" name="q" class="input" placeholder="جستجوی نام یا نامک…" value="{{ search }}">
+      <button type="submit" class="btn btn-outline">جستجو</button>
+    </form>
+    <span class="muted">{{ products.len() }} محصول</span>
+    <a href="/admin/products/new" class="btn btn-accent">افزودن محصول</a>
+  </div>
+
+  {% if products.is_empty() %}
+  <div class="empty-state">
+    <h3>محصولی ثبت نشده است</h3>
+    <a href="/admin/products/new" class="btn btn-primary">افزودن نخستین محصول</a>
+  </div>
+  {% else %}
+  <table class="admin-table admin-table-cards">
+    <thead>
+      <tr><th>نام</th><th>دسته</th><th>برند</th><th>قیمت پایه</th><th>تنوع</th><th>موجودی</th><th>وضعیت</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for p in products %}
+      <tr>
+        <td data-label="نام">
+          <a href="/admin/products/{{ p.id }}/edit" class="prod-name-link">{{ p.name }}</a>
+          {% if p.is_featured %}<span class="badge badge-featured">منتخب</span>{% endif %}
+          <br><span class="muted mono">{{ p.slug }}</span>
+        </td>
+        <td data-label="دسته" class="col-hide-sm">{% if let Some(c) = p.category_name %}{{ c }}{% else %}—{% endif %}</td>
+        <td data-label="برند" class="col-hide-sm">{% if let Some(b) = p.brand_name %}{{ b }}{% else %}—{% endif %}</td>
+        <td data-label="قیمت">{{ p.price_fa() }}</td>
+        <td data-label="تنوع" class="col-hide-sm">{{ p.variant_count }}</td>
+        <td data-label="موجودی">{% if let Some(st) = p.total_stock %}{{ st }}{% else %}۰{% endif %}</td>
+        <td data-label="وضعیت">
+          {% if p.is_active %}<span class="order-status status-active">فعال</span>
+          {% else %}<span class="order-status status-closed">غیرفعال</span>{% endif %}
+        </td>
+        <td class="row-actions">
+          <a href="/admin/products/{{ p.id }}/edit" class="btn btn-ghost">ویرایش</a>
+          <form method="post" action="/admin/products/{{ p.id }}/active" class="inline-form">
+            <input type="hidden" name="value" value="{% if p.is_active %}0{% else %}1{% endif %}">
+            <button type="submit" class="btn btn-ghost">{% if p.is_active %}غیرفعال{% else %}فعال{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

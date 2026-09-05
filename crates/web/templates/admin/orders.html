@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}مدیریت سفارش‌ها — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت سفارش‌ها</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="filter-bar">
+    <a href="/admin/orders" class="filter-chip{% if active_filter.is_empty() %} active{% endif %}">همه ({{ total_count }})</a>
+    {% for st in statuses %}
+    <a href="/admin/orders?status={{ st.key }}" class="filter-chip{% if active_filter == st.key %} active{% endif %}">{{ st.label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if orders.is_empty() %}
+  <div class="empty-state"><h3>سفارشی با این فیلتر یافت نشد</h3></div>
+  {% else %}
+  <table class="admin-table">
+    <thead>
+      <tr><th>شماره</th><th>مشتری</th><th>مبلغ</th><th>روش</th><th>وضعیت</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for o in orders %}
+      <tr>
+        <td>#{{ o.order_number }}</td>
+        <td>
+          {% if let Some(r) = o.ship_receiver %}{{ r }}{% else %}<span class="muted">—</span>{% endif %}
+          {% if let Some(m) = o.customer_mobile %}<br><span class="muted mono">{{ m }}</span>{% endif %}
+        </td>
+        <td>{{ o.total_fa() }}</td>
+        <td>{% if o.is_online() %}آنلاین{% else %}در محل{% endif %}</td>
+        <td><span class="order-status status-{{ o.status }}">{{ o.status_fa() }}</span></td>
+        <td class="row-actions"><a href="/admin/orders/{{ o.id }}" class="btn btn-ghost">جزئیات</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

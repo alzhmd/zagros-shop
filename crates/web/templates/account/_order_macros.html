@@ -1,0 +1,26 @@
+{# ماکروهای مشترکِ سفارش: نوار پیشرفت و اکشن‌های سریع. با {% import %} استفاده می‌شود. #}
+
+{% macro steps(o) %}
+{% if o.is_cancelled() %}
+<div class="ostep ostep-cancelled"><span>این سفارش لغو شد</span></div>
+{% else %}
+{% let st = o.step() %}
+<ol class="ostep" aria-hidden="true">
+  <li class="ostep-i{% if st >= 0 %} done{% endif %}{% if st == 0 %} cur{% endif %}"><b></b><em>ثبت</em></li>
+  <li class="ostep-i{% if st >= 1 %} done{% endif %}{% if st == 1 %} cur{% endif %}"><b></b><em>پرداخت</em></li>
+  <li class="ostep-i{% if st >= 2 %} done{% endif %}{% if st == 2 %} cur{% endif %}"><b></b><em>آماده‌سازی</em></li>
+  <li class="ostep-i{% if st >= 3 %} done{% endif %}{% if st == 3 %} cur{% endif %}"><b></b><em>ارسال</em></li>
+  <li class="ostep-i{% if st >= 4 %} done{% endif %}{% if st == 4 %} cur{% endif %}"><b></b><em>تحویل</em></li>
+</ol>
+{% endif %}
+{% endmacro %}
+
+{% macro actions(o) %}
+<div class="order-actions">
+  <a href="/order/{{ o.id }}" class="oact oact-primary">جزئیات و رهگیری</a>
+  {% if o.can_invoice() %}<a href="/order/{{ o.id }}/invoice" class="oact">فاکتور</a>{% endif %}
+  <form method="post" action="/order/{{ o.id }}/reorder" class="oact-f"><button type="submit" class="oact">خرید مجدد</button></form>
+  {% if o.can_return() %}<a href="/order/{{ o.id }}/return" class="oact">مرجوع‌کردن</a>{% endif %}
+  {% if o.can_cancel() %}<form method="post" action="/order/{{ o.id }}/cancel" class="oact-f" onsubmit="return confirm('این سفارش لغو شود؟')"><button type="submit" class="oact oact-danger">لغو سفارش</button></form>{% endif %}
+</div>
+{% endmacro %}

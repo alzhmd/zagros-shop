@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% block title %}ثبت درخواست تعمیر — {{ site_name }}{% endblock %}
+{% block description %}ثبت آنلاین درخواست تعمیر یخچال، فریزر، آبسردکن و لوازم خانگی — اعزام کارشناس به محل یا تحویل به انبار.{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="repair-intro">
+    <h1>ثبت درخواست تعمیر</h1>
+    <p class="lead">دستگاه خراب خود را ثبت کنید؛ کارشناس ما بررسی و با شما هماهنگ می‌کند.</p>
+    <a href="/repair/track" class="link-more">پیگیری درخواست قبلی ←</a>
+  </div>
+
+  <form method="post" action="/repair" class="repair-form">
+    <div class="form-section">
+      <h3>اطلاعات تماس</h3>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="full_name">نام و نام خانوادگی</label>
+          <input type="text" id="full_name" name="full_name" class="input" value="{{ prefill_name }}" required>
+        </div>
+        <div class="form-field">
+          <label for="phone">شماره تماس</label>
+          <input type="tel" id="phone" name="phone" class="input" value="{{ prefill_phone }}" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>اطلاعات دستگاه</h3>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="device_type">نوع دستگاه</label>
+          <select id="device_type" name="device_type" class="input" required>
+            <option value="یخچال فریزر">یخچال فریزر</option>
+            <option value="فریزر">فریزر</option>
+            <option value="آبسردکن">آبسردکن</option>
+            <option value="جاروبرقی">جاروبرقی</option>
+            <option value="آبمیوه‌گیری">آبمیوه‌گیری</option>
+            <option value="سایر">سایر</option>
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="brand">برند</label>
+          <input type="text" id="brand" name="brand" class="input" placeholder="مثلاً اسنوا">
+        </div>
+        <div class="form-field">
+          <label for="model">مدل (اختیاری)</label>
+          <input type="text" id="model" name="model" class="input">
+        </div>
+        <div class="form-field form-field-full">
+          <label for="problem">شرح مشکل</label>
+          <textarea id="problem" name="problem" class="input" rows="4" required placeholder="مشکل دستگاه را توضیح دهید…"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>روش سرویس</h3>
+      <div class="payment-methods">
+        <label class="payment-option">
+          <input type="radio" name="method" value="onsite" checked onclick="document.getElementById('addr').style.display='grid'">
+          <span>اعزام کارشناس به محل</span>
+        </label>
+        <label class="payment-option">
+          <input type="radio" name="method" value="dropoff" onclick="document.getElementById('addr').style.display='none'">
+          <span>تحویل دستگاه به انبار</span>
+        </label>
+      </div>
+
+      <div id="addr" class="form-grid" style="margin-top:1rem">
+        <div class="form-field">
+          <label for="province">استان</label>
+          <input type="text" id="province" name="province" class="input" value="زنجان">
+        </div>
+        <div class="form-field">
+          <label for="city">شهر</label>
+          <input type="text" id="city" name="city" class="input">
+        </div>
+        <div class="form-field form-field-full">
+          <label for="address">نشانی</label>
+          <textarea id="address" name="address" class="input" rows="2"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-accent btn-lg">ثبت درخواست</button>
+  </form>
+</div>
+{% endblock %}

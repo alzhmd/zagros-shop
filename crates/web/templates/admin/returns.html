@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}مدیریت مرجوعی — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت مرجوعی</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="filter-bar">
+    <a href="/admin/returns" class="filter-chip{% if active_filter.is_empty() %} active{% endif %}">همه</a>
+    {% for st in statuses %}
+    <a href="/admin/returns?status={{ st.key }}" class="filter-chip{% if active_filter == st.key %} active{% endif %}">{{ st.label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if returns.is_empty() %}
+  <div class="empty-state"><h3>مرجوعی‌ای با این فیلتر یافت نشد</h3></div>
+  {% else %}
+  <table class="admin-table admin-table-cards">
+    <thead><tr><th>شماره</th><th>سفارش</th><th>مشتری</th><th>دلیل</th><th>وضعیت</th><th>تاریخ</th><th></th></tr></thead>
+    <tbody>
+      {% for r in returns %}
+      <tr>
+        <td data-label="شماره">#{{ r.number_fa() }}</td>
+        <td data-label="سفارش" class="col-hide-sm">#{{ r.order_number_fa() }}</td>
+        <td data-label="مشتری">{% if let Some(m) = r.customer_mobile %}<span class="mono">{{ m }}</span>{% else %}—{% endif %}</td>
+        <td data-label="دلیل" class="col-hide-sm">{{ r.reason_fa() }}</td>
+        <td data-label="وضعیت"><span class="order-status status-{{ r.status }}">{{ r.status_fa() }}</span></td>
+        <td data-label="تاریخ" class="col-hide-sm">{{ r.date_fa() }}</td>
+        <td class="row-actions"><a href="/admin/returns/{{ r.id }}" class="btn btn-ghost">بررسی</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

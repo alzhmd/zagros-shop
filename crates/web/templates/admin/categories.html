@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}مدیریت دسته‌بندی — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت دسته‌بندی</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <span class="muted">{{ categories.len() }} دسته</span>
+    <a href="/admin/categories/new" class="btn btn-accent">افزودن دسته</a>
+  </div>
+
+  {% if categories.is_empty() %}
+  <div class="empty-state">
+    <h3>دسته‌ای ثبت نشده است</h3>
+    <a href="/admin/categories/new" class="btn btn-primary">افزودن نخستین دسته</a>
+  </div>
+  {% else %}
+  <table class="admin-table">
+    <thead>
+      <tr><th>نام</th><th>والد</th><th>ترتیب</th><th>محصولات</th><th>وضعیت</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for c in categories %}
+      <tr>
+        <td>
+          <a href="/admin/categories/{{ c.id }}/edit" class="prod-name-link">{{ c.name }}</a>
+          <br><span class="muted mono">{{ c.slug }}</span>
+        </td>
+        <td>{% if let Some(p) = c.parent_name %}{{ p }}{% else %}<span class="muted">— ریشه —</span>{% endif %}</td>
+        <td>{{ c.sort_order }}</td>
+        <td>{{ c.product_count }}</td>
+        <td>
+          {% if c.is_active %}<span class="order-status status-active">فعال</span>
+          {% else %}<span class="order-status status-closed">غیرفعال</span>{% endif %}
+        </td>
+        <td class="row-actions">
+          <a href="/admin/categories/{{ c.id }}/edit" class="btn btn-ghost">ویرایش</a>
+          <form method="post" action="/admin/categories/{{ c.id }}/active" class="inline-form">
+            <input type="hidden" name="value" value="{% if c.is_active %}0{% else %}1{% endif %}">
+            <button type="submit" class="btn btn-ghost">{% if c.is_active %}غیرفعال{% else %}فعال{% endif %}</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

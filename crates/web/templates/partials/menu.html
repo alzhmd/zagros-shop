@@ -1,0 +1,10 @@
+<div class="mobile-menu-links">
+{% if let Some(name) = user_name %}
+    <a href="/account" class="mobile-menu-link">حساب کاربری ({{ name }})</a>
+    <a href="/account/wishlist" class="mobile-menu-link">علاقه‌مندی‌ها</a>
+    {% if is_admin %}<a href="/admin" class="mobile-menu-link mobile-menu-admin">پنل مدیریت</a>{% endif %}
+    <form method="post" action="/account/logout"><button type="submit" class="mobile-menu-link mobile-menu-logout">خروج</button></form>
+{% else %}
+    <a href="/account/login" class="mobile-menu-link">ورود / ثبت‌نام</a>
+{% endif %}
+</div>

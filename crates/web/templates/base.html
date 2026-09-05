@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#0B3A53">
+    <meta name="enamad" content="76081384" />
+    <title>{% block title %}{{ site_name }}{% endblock %}</title>
+    <meta name="description" content="{% block description %}فروشگاه لوازم خانگی و برودتی زاگرس — یخچال، فریزر، آبسردکن، و خدمات تعمیرات تخصصی{% endblock %}">
+    {% block canonical %}{% endblock %}
+    <!-- Open Graph / اشتراک‌گذاری -->
+    <meta property="og:site_name" content="زاگرس — جهان کولاک">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:locale" content="fa_IR">
+    <meta property="og:title" content="{% block og_title %}{{ site_name }}{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}فروشگاه و خدمات تخصصی لوازم برودتی و خانگی، برند جهان کولاک.{% endblock %}">
+    {% block og_extra %}{% endblock %}
+    <meta name="twitter:card" content="{% block twitter_card %}summary{% endblock %}">
+    <link rel="preload" href="/assets/fonts/Vazirmatn-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="stylesheet" href="/assets/css/app.css?v=17">
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+    <script src="/assets/js/htmx.min.js" defer></script>
+    <script src="/assets/js/app.js?v=5" defer></script>
+    <script src="/assets/js/alpine.min.js" defer></script>
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <a href="#main" class="skip-link">رفتن به محتوای اصلی</a>
+    <header class="site-header" x-data="{ open: false }">
+        <div class="container header-inner">
+            <button type="button" class="nav-toggle" :aria-expanded="open" @click="open = !open" aria-label="منو" aria-controls="primaryNav">
+                <svg x-show="!open" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+                <svg x-show="open" x-cloak viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="6" y1="6" x2="18" y2="18"/><line x1="6" y1="18" x2="18" y2="6"/></svg>
+            </button>
+
+            <a href="/" class="brand" aria-label="صفحه‌ی اصلی زاگرس">
+                <span class="brand-mark">زاگرس</span>
+                <span class="brand-sub">جهان کولاک</span>
+            </a>
+
+            <form class="header-search" action="/products" method="get" role="search"
+                  @click.outside="$refs.box && ($refs.box.innerHTML = '')">
+                <input type="search" name="q" class="header-search-input" placeholder="جستجوی محصول…"
+                       aria-label="جستجوی محصول" autocomplete="off"
+                       hx-get="/partials/search" hx-trigger="input changed delay:250ms"
+                       hx-target="#searchSuggest" hx-swap="innerHTML">
+                <button type="submit" class="header-search-btn" aria-label="جستجو">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </button>
+                <div id="searchSuggest" x-ref="box" class="search-suggest"></div>
+            </form>
+
+            <nav id="primaryNav" class="main-nav" aria-label="ناوبری اصلی" :class="{ 'is-open': open }">
+                <form class="mobile-search" action="/products" method="get" role="search" @submit="open = false">
+                    <input type="search" name="q" class="input" placeholder="جستجوی محصول…" aria-label="جستجوی محصول">
+                    <button type="submit" class="btn btn-primary" aria-label="جستجو">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </button>
+                </form>
+                <a href="/products" @click="open = false">محصولات</a>
+                <a href="/offers" @click="open = false">پیشنهادها</a>
+                <a href="/repair" @click="open = false">تعمیرات</a>
+                <a href="/support" @click="open = false">پشتیبانی</a>
+                <a href="/about" @click="open = false">درباره ما</a>
+                <div class="mobile-nav-actions" id="mobileChrome"
+                     hx-get="/partials/menu" hx-trigger="load, cart-changed from:body" hx-swap="innerHTML"></div>
+            </nav>
+
+            <a href="/cart" class="icon-btn cart-link header-cart" aria-label="سبد خرید"
+               id="headerCart" hx-get="/partials/cart-mini" hx-trigger="load, cart-changed from:body" hx-swap="innerHTML">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+            </a>
+
+            <div class="header-actions" id="headerChrome"
+                 hx-get="/partials/header" hx-trigger="load, cart-changed from:body" hx-swap="innerHTML">
+                <a href="/account" class="btn btn-ghost">ورود</a>
+            </div>
+        </div>
+    </header>
+
+    <main id="main">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container footer-grid">
+            <div>
+                <div class="brand-mark">زاگرس — جهان کولاک</div>
+                <p class="muted">فروش و خدمات تخصصی لوازم برودتی و خانگی.</p>
+            </div>
+            <nav aria-label="پیوندهای فوتر">
+                <h4>دسترسی سریع</h4>
+                <a href="/products">محصولات</a>
+                <a href="/repair">ثبت تعمیر</a>
+                <a href="/support">تیکت پشتیبانی</a>
+                <a href="/faq">پرسش‌های متداول</a>
+                <a href="/contact">تماس با ما</a>
+                <a href="/terms">قوانین</a>
+            </nav>
+            <div hx-get="/partials/footer" hx-trigger="load" hx-swap="innerHTML">
+                <h4>تماس</h4>
+                <p class="muted">استان زنجان — ارسال به سراسر کشور</p>
+            </div>
+        </div>
+        <div class="container footer-bottom muted">
+            © ۱۴۰۵ {{ site_name }}. تمام حقوق محفوظ است.
+        </div>
+    </footer>
+
+    <!-- نوار پایین موبایل (Tab Bar) -->
+    <nav class="tabbar" aria-label="ناوبری پایین">
+        <a href="/" class="tabbar-item">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9.5 12 3l9 6.5"/><path d="M5 10v10h14V10"/></svg>
+            <span>خانه</span>
+        </a>
+        <a href="/categories" class="tabbar-item">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            <span>دسته‌ها</span>
+        </a>
+        <a href="/cart" class="tabbar-item tabbar-cart">
+            <span class="tabbar-cart-ico">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                <span class="tabbar-badge" hx-get="/partials/cart-mini-badge" hx-trigger="load, cart-changed from:body" hx-swap="innerHTML"></span>
+            </span>
+            <span>سبد</span>
+        </a>
+        <a href="/account" class="tabbar-item">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <span>حساب</span>
+        </a>
+    </nav>
+</body>
+</html>

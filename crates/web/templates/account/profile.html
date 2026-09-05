@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}ویرایش پروفایل — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>ویرایش پروفایل</h1>
+        {% if saved %}<div class="alert alert-success">تغییرات ذخیره شد.</div>{% endif %}
+        {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+        <form method="post" action="/account/profile" class="repair-form" style="max-width:520px">
+            <div class="form-field">
+                <label for="mobile">شماره موبایل</label>
+                <input type="tel" id="mobile" class="input" value="{{ user.mobile }}" dir="ltr" disabled>
+                <small class="muted">شماره موبایل قابل تغییر نیست.</small>
+            </div>
+            <div class="form-field">
+                <label for="full_name">نام و نام خانوادگی</label>
+                <input type="text" id="full_name" name="full_name" class="input" value="{% if let Some(n) = user.full_name %}{{ n }}{% endif %}">
+            </div>
+            <div class="form-field">
+                <label for="email">ایمیل (اختیاری)</label>
+                <input type="email" id="email" name="email" class="input" dir="ltr" value="{% if let Some(e) = user.email %}{{ e }}{% endif %}">
+            </div>
+            <div class="form-field">
+                <label for="birthdate">تاریخ تولد (اختیاری)</label>
+                <input type="date" id="birthdate" name="birthdate" class="input" dir="ltr" value="{% if let Some(b) = user.birthdate %}{{ b }}{% endif %}">
+            </div>
+            <div class="form-field">
+                <label for="gender">جنسیت (اختیاری)</label>
+                <select id="gender" name="gender" class="input">
+                    <option value="">نامشخص</option>
+                    <option value="male"{% if let Some(g) = user.gender %}{% if g == "male" %} selected{% endif %}{% endif %}>مرد</option>
+                    <option value="female"{% if let Some(g) = user.gender %}{% if g == "female" %} selected{% endif %}{% endif %}>زن</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-accent btn-lg">ذخیره‌ی تغییرات</button>
+        </form>
+
+        <div class="form-section admin-subsection danger-zone" style="max-width:520px; margin-top:var(--space-8)">
+            <h3>حذف حساب</h3>
+            <p class="muted">با حذف حساب، اطلاعات شخصی شما پاک و حساب غیرفعال می‌شود. تاریخچه‌ی سفارش‌ها برای امور مالی حفظ می‌شود. این کار قابل بازگشت نیست.</p>
+            <form method="post" action="/account/delete" onsubmit="return confirm('از حذف حساب خود مطمئن هستید؟ این کار بازگشت‌پذیر نیست.')">
+                <button type="submit" class="btn btn-danger">حذف حساب من</button>
+            </form>
+        </div>
+    </section>
+</div>
+{% endblock %}

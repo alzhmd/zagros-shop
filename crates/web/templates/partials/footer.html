@@ -1,0 +1,3 @@
+<h4>تماس</h4>
+<p class="muted">{{ contact_address }}</p>
+{% if !contact_phone.is_empty() %}<p class="muted"><a href="tel:{{ contact_phone }}" dir="ltr">{{ contact_phone }}</a></p>{% endif %}

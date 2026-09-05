@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}مرجوعی‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+    <section class="account-main">
+        <h1>درخواست‌های مرجوعی</h1>
+        {% if returns.is_empty() %}
+        <div class="empty-state">
+            <h3>درخواست مرجوعی ندارید</h3>
+            <p class="muted">برای مرجوع‌کردن کالا، از صفحه‌ی سفارش تحویل‌شده اقدام کنید.</p>
+            <a href="/account/orders" class="btn btn-primary">سفارش‌های من</a>
+        </div>
+        {% else %}
+        <div class="order-list">
+            {% for r in returns %}
+            <a href="/return/{{ r.return_number }}" class="order-row">
+                <div class="order-row-main">
+                    <span class="order-number">مرجوعی #{{ r.number_fa() }}</span>
+                    <span class="order-status status-{{ r.status }}">{{ r.status_fa() }}</span>
+                </div>
+                <div class="order-row-meta">
+                    <span class="muted">{{ r.reason_fa() }}</span>
+                    <span class="muted">{{ r.date_fa() }}</span>
+                    {% if let Some(rf) = r.refund_fa() %}<span class="order-total">{{ rf }}</span>{% endif %}
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

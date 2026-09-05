@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}مدیریت نظرات — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت نظرات</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="filter-bar">
+    <a href="/admin/reviews" class="filter-chip{% if active_filter.is_empty() %} active{% endif %}">همه</a>
+    {% for st in statuses %}
+    <a href="/admin/reviews?status={{ st.0 }}" class="filter-chip{% if active_filter == st.0 %} active{% endif %}">{{ st.1 }}</a>
+    {% endfor %}
+  </div>
+
+  {% if reviews.is_empty() %}
+  <div class="empty-state"><h3>نظری با این فیلتر یافت نشد</h3></div>
+  {% else %}
+  <div class="review-admin-list">
+    {% for r in reviews %}
+    <div class="review-admin-card">
+      <div class="review-admin-head">
+        <span class="stars" aria-hidden="true">{{ r.stars_str() }}</span>
+        <strong>{{ r.author_name }}</strong>
+        {% if r.is_verified %}<span class="review-verified">✓ خرید تأییدشده</span>{% endif %}
+        <a href="/product/{{ r.product_slug }}" class="muted">{{ r.product_name }}</a>
+        <span class="muted">{{ r.date_fa() }}</span>
+        <span class="order-status status-{{ r.status }}">{{ r.status_fa() }}</span>
+      </div>
+      {% if let Some(t) = r.title %}<strong>{{ t }}</strong>{% endif %}
+      <p class="review-body">{{ r.body }}</p>
+      <div class="row-actions">
+        {% if r.status != "approved" %}
+        <form method="post" action="/admin/reviews/{{ r.id }}/status" class="inline-form">
+          <input type="hidden" name="status" value="approved">
+          <button type="submit" class="btn btn-primary btn-sm">تأیید</button>
+        </form>
+        {% endif %}
+        {% if r.status != "rejected" %}
+        <form method="post" action="/admin/reviews/{{ r.id }}/status" class="inline-form">
+          <input type="hidden" name="status" value="rejected">
+          <button type="submit" class="btn btn-ghost btn-sm">رد</button>
+        </form>
+        {% endif %}
+        <form method="post" action="/admin/reviews/{{ r.id }}/delete" class="inline-form" onsubmit="return confirm('حذف این نظر؟')">
+          <button type="submit" class="btn btn-ghost btn-sm btn-danger">حذف</button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

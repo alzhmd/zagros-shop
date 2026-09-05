@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}بنرها — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>بنر و کمپین</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  <div class="admin-toolbar">
+    <span class="muted">اسلایدر صفحه‌ی اصلی (hero) و نوار تبلیغ (strip)</span>
+    <a href="/admin/banners/new" class="btn btn-accent">افزودن بنر</a>
+  </div>
+  {% if banners.is_empty() %}
+  <div class="empty-state"><p class="muted">بنری ثبت نشده.</p></div>
+  {% else %}
+  <table class="admin-table">
+    <thead><tr><th>جایگاه</th><th>عنوان</th><th>ترتیب</th><th>وضعیت</th><th></th></tr></thead>
+    <tbody>
+      {% for b in banners %}
+      <tr>
+        <td><span class="mono">{{ b.placement }}</span></td>
+        <td>{% if let Some(t) = b.title %}{{ t }}{% else %}—{% endif %}</td>
+        <td>{{ b.sort_order }}</td>
+        <td>{% if b.is_active %}فعال{% else %}غیرفعال{% endif %}</td>
+        <td class="row-actions">
+          <a href="/admin/banners/{{ b.id }}/edit" class="btn btn-ghost btn-sm">ویرایش</a>
+          <form method="post" action="/admin/banners/{{ b.id }}/delete" style="display:inline" onsubmit="return confirm('حذف این بنر؟')"><button class="btn btn-ghost btn-sm btn-danger">حذف</button></form>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}سفارش #{{ order_number_fa }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>سفارش #{{ order_number_fa }}</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  <p><a href="/admin/orders" class="muted">→ بازگشت به فهرست سفارش‌ها</a></p>
+
+  <div class="admin-detail-grid">
+    <div class="detail-panel">
+      <h3>اقلام سفارش</h3>
+      <table class="admin-table">
+        <thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>جمع</th></tr></thead>
+        <tbody>
+          {% for it in items %}
+          <tr>
+            <td>{{ it.product_name }}{% if let Some(v) = it.variant_title %} <span class="muted">— {{ v }}</span>{% endif %}</td>
+            <td>{{ it.qty }}</td>
+            <td>{{ it.unit_price_fa() }}</td>
+            <td>{{ it.line_total_fa() }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="order-totals">
+        <div class="info-row"><span class="muted">جمع اقلام</span><span>{{ order.subtotal_fa() }}</span></div>
+        {% if order.discount > 0 %}<div class="info-row"><span class="muted">تخفیف{% if let Some(c) = order.coupon_code %} ({{ c }}){% endif %}</span><span>−{{ order.discount_fa() }}</span></div>{% endif %}
+        <div class="info-row"><span class="muted">هزینه‌ی ارسال{% if let Some(sm) = order.shipping_method %} ({{ sm }}){% endif %}</span><span>{{ order.shipping_fa() }}</span></div>
+        <div class="info-row summary-total"><strong>مبلغ کل</strong><strong>{{ order.total_fa() }}</strong></div>
+      </div>
+
+      {% if !payments.is_empty() %}
+      <h3 style="margin-top:1.5rem">پرداخت‌ها</h3>
+      {% for p in payments %}
+      <div class="payment-row-card">
+        <div class="info-row"><span class="muted">درگاه</span><span>{{ p.provider }}</span></div>
+        <div class="info-row"><span class="muted">مبلغ</span><span>{{ p.amount_fa() }}</span></div>
+        <div class="info-row"><span class="muted">وضعیت</span><span>{{ p.state_fa() }}</span></div>
+        {% if let Some(r) = p.ref_id %}<div class="info-row"><span class="muted">کد پیگیری</span><span class="mono">{{ r }}</span></div>{% endif %}
+        {% if let Some(c) = p.card_pan %}<div class="info-row"><span class="muted">کارت</span><span class="mono">{{ c }}</span></div>{% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="detail-panel">
+      <h3>مشتری و ارسال</h3>
+      <div class="info-row"><span class="muted">گیرنده</span><span>{% if let Some(r) = order.ship_receiver %}{{ r }}{% else %}—{% endif %}</span></div>
+      <div class="info-row"><span class="muted">موبایل حساب</span><span class="mono">{% if let Some(m) = customer_mobile %}{{ m }}{% else %}مهمان{% endif %}</span></div>
+      <div class="info-row"><span class="muted">تلفن ارسال</span><span class="mono">{% if let Some(p) = order.ship_phone %}{{ p }}{% else %}—{% endif %}</span></div>
+      <div class="info-row"><span class="muted">استان/شهر</span><span>{% if let Some(p) = order.ship_province %}{{ p }}{% endif %}{% if let Some(c) = order.ship_city %} — {{ c }}{% endif %}</span></div>
+      <div class="info-row"><span class="muted">نشانی</span><span>{% if let Some(a) = order.ship_address %}{{ a }}{% else %}—{% endif %}</span></div>
+      {% if let Some(uid) = order.user_id %}<div class="info-row"><span class="muted">حساب کاربری</span><a href="/admin/users/{{ uid }}">مشاهده‌ی کاربر</a></div>{% endif %}
+
+      <h3 style="margin-top:1.5rem">تغییر وضعیت</h3>
+      <div class="info-row"><span class="muted">وضعیت فعلی</span><span class="order-status status-{{ order.status }}">{{ order.status_fa() }}</span></div>
+      <form method="post" action="/admin/orders/{{ order.id }}" class="auth-form">
+        <select name="status" class="input">
+          {% for st in statuses %}
+          <option value="{{ st.key }}"{% if order.status == st.key %} selected{% endif %}>{{ st.label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary btn-block">ثبت وضعیت</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

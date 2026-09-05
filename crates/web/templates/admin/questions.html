@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}پرسش‌ها — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>پرسش و پاسخ</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <a href="/admin/questions" class="btn btn-ghost{% if active_filter.is_empty() %} active{% endif %}">همه</a>
+    <a href="/admin/questions?status=pending" class="btn btn-ghost{% if active_filter == "pending" %} active{% endif %}">در انتظار</a>
+    <a href="/admin/questions?status=approved" class="btn btn-ghost{% if active_filter == "approved" %} active{% endif %}">تأییدشده</a>
+  </div>
+
+  {% if questions.is_empty() %}
+  <div class="empty-state"><p class="muted">پرسشی نیست.</p></div>
+  {% else %}
+  <div class="qa-admin-list">
+    {% for q in questions %}
+    <div class="qa-admin-item">
+      <div class="qa-admin-head">
+        <a href="/product/{{ q.product_slug }}" target="_blank" class="prod-name-link">{{ q.product_name }}</a>
+        <span class="status-chip status-{{ q.status }}">{{ q.status }}</span>
+      </div>
+      <p class="qa-admin-body"><strong>{{ q.author_name }}:</strong> {{ q.body }}</p>
+      {% if let Some(a) = q.answer %}<p class="qa-admin-answer">پاسخ: {{ a }}</p>{% endif %}
+      <form method="post" action="/admin/questions/{{ q.id }}/answer" class="qa-answer-form">
+        <input type="text" name="body" class="input" placeholder="پاسخ شما (ثبت = تأیید خودکار)" required>
+        <button type="submit" class="btn btn-accent btn-sm">ثبت پاسخ</button>
+      </form>
+      <div class="row-actions">
+        <form method="post" action="/admin/questions/{{ q.id }}/status" style="display:inline"><input type="hidden" name="status" value="approved"><button class="btn btn-ghost btn-sm">تأیید</button></form>
+        <form method="post" action="/admin/questions/{{ q.id }}/status" style="display:inline"><input type="hidden" name="status" value="rejected"><button class="btn btn-ghost btn-sm">رد</button></form>
+        <form method="post" action="/admin/questions/{{ q.id }}/delete" style="display:inline" onsubmit="return confirm('حذف این پرسش؟')"><button class="btn btn-ghost btn-sm btn-danger">حذف</button></form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

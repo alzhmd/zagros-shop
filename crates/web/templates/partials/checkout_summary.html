@@ -1,0 +1,23 @@
+<div id="checkoutSummary">
+    {% if let Some(msg) = coupon_msg %}
+    <div class="alert {% if coupon_ok %}alert-success{% else %}alert-error{% endif %} alert-sm">{{ msg }}</div>
+    {% endif %}
+    <div class="summary-row">
+        <span class="muted">مبلغ اقلام</span>
+        <span>{{ subtotal_fa }}</span>
+    </div>
+    {% if let Some(d) = discount_fa %}
+    <div class="summary-row summary-discount">
+        <span class="muted">تخفیف</span>
+        <span>− {{ d }}</span>
+    </div>
+    {% endif %}
+    <div class="summary-row">
+        <span class="muted">هزینه‌ی ارسال</span>
+        <span>{% if free_shipping %}رایگان{% else %}{{ shipping_fa }}{% endif %}</span>
+    </div>
+    <div class="summary-row summary-total">
+        <span>مبلغ قابل پرداخت</span>
+        <strong>{{ total_fa }}</strong>
+    </div>
+</div>

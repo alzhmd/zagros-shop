@@ -1,0 +1,11 @@
+/target
+**/*.rs.bk
+.env
+/config/config.local.toml
+*.log
+/assets/uploads/*
+!/assets/uploads/.gitkeep
+
+# artifactهای توسعه — در مخزن عمومی نیازی نیست
+/audit/
+/.claude/

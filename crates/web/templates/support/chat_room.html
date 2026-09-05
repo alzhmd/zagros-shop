@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}گفت‌وگوی زنده — {{ site_name }}{% endblock %}
+{% block head %}<script src="/assets/js/chat.js" defer></script>{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="chat-window" id="chat" data-role="{{ role }}" data-ws-path="/support/chat/{{ session_id }}/ws">
+    <div class="chat-header">
+      <div class="chat-peer">
+        <strong>{{ peer_label }}</strong>
+        <span id="chat-status" class="chat-status muted">در حال اتصال…</span>
+      </div>
+      {% if role == "staff" %}
+      <a href="/admin/chat" class="btn btn-ghost">بازگشت به فهرست</a>
+      {% else %}
+      <a href="/support" class="btn btn-ghost">پشتیبانی</a>
+      {% endif %}
+    </div>
+    <div class="chat-log" id="chat-log" aria-live="polite"></div>
+    <form class="chat-form" id="chat-form">
+      <input type="text" id="chat-input" class="input chat-input" autocomplete="off"
+             placeholder="پیام خود را بنویسید…" required>
+      <button type="submit" class="btn btn-accent">ارسال</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

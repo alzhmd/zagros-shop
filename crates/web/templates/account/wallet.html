@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}کیف پول — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>کیف پول</h1>
+
+        <div class="club-points-card">
+            <span class="muted">موجودی کیف پول</span>
+            <div class="club-points-value">{{ balance_fa }}</div>
+            <p class="muted">از موجودی کیف پول می‌توانید هنگام تسویه‌حساب استفاده کنید. مبلغِ لغو سفارش و مرجوعی‌های تأییدشده به‌صورت خودکار به کیف پول بازمی‌گردد.</p>
+        </div>
+
+        <div class="gift-redeem">
+            <h2>کارت هدیه دارید؟</h2>
+            {% if let Some(m) = gift_msg %}<div class="alert {% if gift_ok %}alert-success{% else %}alert-error{% endif %} alert-sm">{{ m }}</div>{% endif %}
+            <form method="post" action="/account/wallet/redeem-gift" class="coupon-apply">
+                <input type="text" name="code" class="input mono" placeholder="کد کارت هدیه" dir="ltr" autocomplete="off" required>
+                <button type="submit" class="btn btn-accent">واریز به کیف پول</button>
+            </form>
+        </div>
+
+        <h2>تاریخچه‌ی تراکنش‌ها</h2>
+        {% if history.is_empty() %}
+        <div class="empty-state"><p class="muted">هنوز تراکنشی ثبت نشده است.</p></div>
+        {% else %}
+        <table class="data-table">
+            <thead><tr><th>نوع</th><th>مبلغ</th><th>توضیح</th><th>تاریخ</th></tr></thead>
+            <tbody>
+                {% for t in history %}
+                <tr>
+                    <td>{{ t.kind_fa() }}</td>
+                    <td class="{% if t.is_credit() %}txt-credit{% else %}txt-debit{% endif %}">{% if t.is_credit() %}+{% else %}−{% endif %} {{ t.amount_fa() }}</td>
+                    <td class="muted">{% if let Some(n) = t.note %}{{ n }}{% endif %}</td>
+                    <td class="muted mono">{{ t.created_at.format("%Y-%m-%d %H:%M") }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

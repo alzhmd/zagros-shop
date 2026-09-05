@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}اعلان‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>اعلان‌ها</h1>
+        {% if items.is_empty() %}
+        <div class="empty-state"><p class="muted">اعلانی ندارید.</p></div>
+        {% else %}
+        <ul class="notif-list">
+            {% for n in items %}
+            <li class="notif-item{% if n.is_unread() %} is-unread{% endif %}">
+                <span class="notif-ic" aria-hidden="true">{{ n.icon() }}</span>
+                <div class="notif-body">
+                    {% if let Some(url) = n.url %}
+                    <a href="{{ url }}" class="notif-title">{{ n.title }}</a>
+                    {% else %}
+                    <span class="notif-title">{{ n.title }}</span>
+                    {% endif %}
+                    {% if let Some(b) = n.body %}<p class="muted">{{ b }}</p>{% endif %}
+                    <span class="muted mono notif-date">{{ n.created_at.format("%Y-%m-%d %H:%M") }}</span>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

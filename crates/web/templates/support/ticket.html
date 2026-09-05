@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}تیکت #{{ ticket_fa }} — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="ticket-thread">
+    <div class="track-head">
+      <div>
+        <span class="muted">تیکت #{{ ticket_fa }}</span>
+        <h1>{{ ticket.subject }}</h1>
+      </div>
+      <span class="order-status status-{{ ticket.status }}">{{ ticket.status_fa() }}</span>
+    </div>
+    <div class="ticket-meta">
+      <span class="tag">بخش: {{ ticket.department_fa() }}</span>
+      <span class="tag">اولویت: {{ ticket.priority_fa() }}</span>
+    </div>
+
+    <div class="msg-thread">
+      {% for m in messages %}
+      <div class="msg {% if m.is_staff() %}msg-staff{% else %}msg-customer{% endif %}">
+        <div class="msg-sender">{{ m.sender_fa() }}</div>
+        <div class="msg-body">{{ m.body }}</div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if ticket.is_closed() %}
+    <div class="alert">این تیکت بسته شده است. برای پیگیری مجدد تیکت تازه‌ای ثبت کنید.</div>
+    {% else %}
+    <form method="post" action="/support/ticket/{{ ticket.ticket_number }}/reply" class="reply-form">
+      <textarea name="body" class="input" rows="3" required placeholder="پاسخ خود را بنویسید…"></textarea>
+      <button type="submit" class="btn btn-accent">ارسال پاسخ</button>
+    </form>
+    {% endif %}
+
+    <p class="muted" style="margin-top:1rem"><a href="/support">→ بازگشت به پشتیبانی</a></p>
+  </div>
+</div>
+{% endblock %}

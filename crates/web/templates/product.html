@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+
+{% block title %}{{ p.name }} — {{ site_name }}{% endblock %}
+{% block description %}{% if let Some(d) = p.short_desc %}{{ d }}{% else %}{{ p.name }} با بهترین قیمت و گارانتی معتبر از فروشگاه زاگرس.{% endif %}{% endblock %}
+
+{% block canonical %}<link rel="canonical" href="{{ canonical }}">{% endblock %}
+{% block og_type %}product{% endblock %}
+{% block og_title %}{{ p.name }}{% endblock %}
+{% block og_description %}{% if let Some(d) = p.short_desc %}{{ d }}{% else %}{{ p.name }} با بهترین قیمت و گارانتی معتبر از فروشگاه زاگرس.{% endif %}{% endblock %}
+{% block og_extra %}<meta property="og:url" content="{{ canonical }}">{% if let Some(img) = og_image %}<meta property="og:image" content="{{ img }}">{% endif %}<meta property="product:price:amount" content="{{ offer_price }}"><meta property="product:price:currency" content="IRR">{% endblock %}
+{% block twitter_card %}{% if og_image.is_some() %}summary_large_image{% else %}summary{% endif %}{% endblock %}
+
+{% block head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ p.name }}",
+  "description": "{% if let Some(d) = p.short_desc %}{{ d }}{% endif %}",
+  "url": "{{ canonical }}",
+  {% if let Some(img) = og_image %}"image": "{{ img }}",{% endif %}
+  {% if let Some(b) = brand %}"brand": { "@type": "Brand", "name": "{{ b.name }}" },{% endif %}
+  {% if rating.has_any() %}"aggregateRating": { "@type": "AggregateRating", "ratingValue": "{{ rating.average_1dp() }}", "reviewCount": "{{ rating.count }}" },{% endif %}
+  "offers": {
+    "@type": "Offer",
+    "url": "{{ canonical }}",
+    "priceCurrency": "IRR",
+    "price": "{{ offer_price }}",
+    {% if let Some(ends) = deal_ends_iso %}"priceValidUntil": "{{ ends }}",{% endif %}
+    "availability": "{% if in_stock %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "خانه", "item": "{{ base_url }}/" },
+    { "@type": "ListItem", "position": 2, "name": "محصولات", "item": "{{ base_url }}/products" }{% if let Some((slug, name)) = breadcrumb_cat %},
+    { "@type": "ListItem", "position": 3, "name": "{{ name }}", "item": "{{ base_url }}/products?cat={{ slug }}" },
+    { "@type": "ListItem", "position": 4, "name": "{{ p.name }}", "item": "{{ canonical }}" }{% else %},
+    { "@type": "ListItem", "position": 3, "name": "{{ p.name }}", "item": "{{ canonical }}" }{% endif %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav class="breadcrumb" aria-label="مسیر">
+        <a href="/">خانه</a>
+        <span aria-hidden="true">/</span>
+        <a href="/products">محصولات</a>
+        {% if let Some((slug, name)) = breadcrumb_cat %}
+        <span aria-hidden="true">/</span>
+        <a href="/products?cat={{ slug }}">{{ name }}</a>
+        {% endif %}
+    </nav>
+
+    <!-- ضبط «بازدید اخیر» (سمت کلاینت؛ app.js می‌خواند) -->
+    <div id="rvProduct" hidden
+         data-slug="{{ p.slug }}"
+         data-title="{{ p.name }}"
+         {% if !images.is_empty() %}data-img="{{ images[0].path }}"{% endif %}
+         data-price="{{ min_price_fa }}"></div>
+
+    <div class="product-detail">
+        <!-- گالری -->
+        <div class="product-gallery">
+            {% if images.is_empty() %}
+            <div class="gallery-main gallery-placeholder" aria-hidden="true">
+                <span>زاگرس</span>
+            </div>
+            {% else %}
+            <div class="gallery-main">
+                <img id="mainImage" src="{{ images[0].path }}" alt="{{ p.name }}" width="600" height="600">
+            </div>
+            {% if images.len() > 1 %}
+            <div class="gallery-thumbs">
+                {% for img in images %}
+                <button type="button" class="gallery-thumb{% if loop.first %} active{% endif %}"
+                        data-gallery-thumb data-src="{{ img.path }}">
+                    <img src="{{ img.path }}" alt="{% if let Some(a) = img.alt %}{{ a }}{% else %}{{ p.name }}{% endif %}" width="80" height="80" loading="lazy">
+                </button>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endif %}
+        </div>
+
+        <!-- اطلاعات و خرید -->
+        <div class="product-info">
+            {% if let Some(b) = brand %}<a href="/products?brand={{ b.slug }}" class="product-brand-link">{{ b.name }}</a>{% endif %}
+            <h1>{{ p.name }}</h1>
+            {% if rating.has_any() %}
+            <a href="#reviews" class="rating-inline">
+                <span class="stars" aria-hidden="true">{{ rating.stars_str() }}</span>
+                <span>{{ rating.average_fa() }} از ۵ ({{ rating.count_fa() }} نظر)</span>
+            </a>
+            {% endif %}
+            {% if let Some(d) = p.short_desc %}<p class="lead">{{ d }}</p>{% endif %}
+
+            <div class="product-buy-box">
+                <div class="price-line">
+                    <span class="price-label">قیمت:</span>
+                    <span class="price-stack">
+                        <span class="price-compare" id="variantCompare"{% if !cheapest_has_discount %} hidden{% endif %}>{{ cheapest_compare_fa }}</span>
+                        <span class="price-now-row">
+                            <span class="price-value" id="variantPrice">{{ min_price_fa }}</span>
+                            <span class="badge-discount price-pct" id="variantPct"{% if !cheapest_has_discount %} hidden{% endif %}>{{ cheapest_pct_fa }}٪</span>
+                        </span>
+                    </span>
+                </div>
+
+                {% if let Some(ends) = deal_ends_iso %}
+                <div class="deal-timer" data-deal-countdown="{{ ends }}" role="timer" aria-live="off">
+                    <span class="deal-timer-label">پایان پیشنهاد تا:</span>
+                    <span class="deal-timer-clock" data-deal-clock>—</span>
+                </div>
+                {% endif %}
+
+                {% if variants.len() > 1 %}
+                <div class="variant-select">
+                    <label for="variantSelect">انتخاب مدل:</label>
+                    <select id="variantSelect" class="input">
+                        {% for v in variants %}
+                        <option value="{{ v.id }}" data-price-fa="{{ v.price_fa() }}" data-stock="{{ v.stock }}"
+                                data-compare-fa="{% if v.has_discount() %}{{ v.compare_at_fa() }}{% endif %}"
+                                data-pct="{% if v.has_discount() %}{{ v.discount_pct_fa() }}{% endif %}"{% if v.stock == 0 %} disabled{% endif %}>
+                            {{ v.title }}{% if v.stock == 0 %} (ناموجود){% endif %}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                {% if in_stock %}
+                <form method="post" action="/cart/add" class="add-cart-form"
+                      hx-post="/cart/add" hx-swap="none">
+                    {% if !variants.is_empty() %}<input type="hidden" id="variantIdInput" name="variant_id" value="{{ variants[0].id }}">{% endif %}
+                    <div class="qty-control" data-qty-control>
+                        <button type="button" class="qty-btn" data-qty-step="-1" aria-label="کاهش">−</button>
+                        <input type="number" id="qtyInput" name="qty" value="1" min="1" max="{{ variants[0].stock }}" class="qty-input" aria-label="تعداد">
+                        <button type="button" class="qty-btn" data-qty-step="1" aria-label="افزایش">+</button>
+                    </div>
+                    <button type="submit" id="addToCartBtn" class="btn btn-accent btn-lg btn-block">افزودن به سبد خرید</button>
+                    <button type="submit" name="action" value="buy" class="btn btn-outline btn-block">خرید سریع</button>
+                </form>
+                {% else %}
+                <div class="out-of-stock-box">
+                    <span class="badge badge-out">ناموجود</span>
+                    <p class="muted">این محصول فعلاً موجود نیست.</p>
+                    {% if !variants.is_empty() %}
+                    <form method="post" action="/alerts/stock">
+                        <input type="hidden" name="variant_id" value="{{ variants[0].id }}">
+                        <input type="hidden" name="slug" value="{{ p.slug }}">
+                        <button type="submit" class="btn btn-outline btn-block">🔔 خبرم کن وقتی موجود شد</button>
+                    </form>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div class="buy-actions">
+                    {% include "partials/wishlist_button.html" %}
+                    <button type="button" class="icon-act share-btn"
+                            data-share-title="{{ p.name }}" data-share-url="{{ canonical }}"
+                            aria-label="اشتراک‌گذاری" title="اشتراک‌گذاری">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>
+                    </button>
+                </div>
+
+                <ul class="trust-points">
+                    <li>ضمانت اصالت کالا</li>
+                    <li>گارانتی معتبر</li>
+                    <li>ارسال به سراسر کشور</li>
+                    <li class="ship-badge">ارسال به سراسر کشور — پرداخت در محل ویژه‌ی زنجان</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- توضیحات کامل -->
+    {% if let Some(desc) = p.description %}
+    <section class="product-description">
+        <h2>توضیحات محصول</h2>
+        <p>{{ desc }}</p>
+    </section>
+    {% endif %}
+
+    <!-- ویدئوی محصول -->
+    {% if let Some(embed) = video_embed %}
+    <section class="product-video">
+        <h2>ویدئوی محصول</h2>
+        <div class="video-frame">
+            <iframe src="{{ embed }}" title="ویدئوی {{ p.name }}" loading="lazy"
+                    allowfullscreen referrerpolicy="no-referrer"></iframe>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- مشخصات فنی -->
+    {% if !attrs.is_empty() %}
+    <section class="product-specs">
+        <h2>مشخصات فنی</h2>
+        <table class="specs-table">
+            <tbody>
+                {% for a in attrs %}
+                <tr><th scope="row">{{ a.name }}</th><td>{{ a.value }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </section>
+    {% endif %}
+
+    <!-- نقد و امتیاز -->
+    <section class="reviews-section" id="reviews">
+        <h2>نقد و بررسی کاربران</h2>
+        <div class="reviews-summary">
+            <div>
+                <div class="reviews-avg">{% if rating.has_any() %}{{ rating.average_fa() }}{% else %}—{% endif %}</div>
+                <div class="stars" aria-hidden="true">{{ rating.stars_str() }}</div>
+            </div>
+            <div class="muted">{% if rating.has_any() %}بر پایه‌ی {{ rating.count_fa() }} نظر تأییدشده{% else %}هنوز نظری ثبت نشده — اولین نفر باشید!{% endif %}</div>
+        </div>
+
+        {% if !reviews.is_empty() %}
+        <div class="review-list">
+            {% for r in reviews %}
+            <article class="review-card">
+                <div class="review-head">
+                    <span class="stars" aria-hidden="true">{{ r.stars_str() }}</span>
+                    <span class="review-author">{{ r.author_name }}</span>
+                    {% if r.is_verified %}<span class="review-verified">✓ خرید تأییدشده</span>{% endif %}
+                    <span class="muted">{{ r.date_fa() }}</span>
+                </div>
+                {% if let Some(t) = r.title %}<strong>{{ t }}</strong>{% endif %}
+                <p class="review-body">{{ r.body }}</p>
+                <div class="review-foot">
+                    {% if logged_in %}
+                    <button type="button" class="review-helpful" hx-post="/reviews/{{ r.id }}/helpful" hx-swap="outerHTML">👍 مفید بود{% if r.helpful_count > 0 %} · {{ r.helpful_fa() }}{% endif %}</button>
+                    {% else if r.helpful_count > 0 %}
+                    <span class="review-helpful is-voted">👍 {{ r.helpful_fa() }} نفر مفید دانستند</span>
+                    {% endif %}
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" action="/reviews" class="review-form">
+            <h3>نظر خود را ثبت کنید</h3>
+            <input type="hidden" name="product_id" value="{{ p.id }}">
+            <input type="hidden" name="slug" value="{{ p.slug }}">
+            <div class="form-field">
+                <label>امتیاز شما</label>
+                <div class="star-input">
+                    <input type="radio" name="rating" id="r5" value="5" required><label for="r5" title="۵">★</label>
+                    <input type="radio" name="rating" id="r4" value="4"><label for="r4" title="۴">★</label>
+                    <input type="radio" name="rating" id="r3" value="3"><label for="r3" title="۳">★</label>
+                    <input type="radio" name="rating" id="r2" value="2"><label for="r2" title="۲">★</label>
+                    <input type="radio" name="rating" id="r1" value="1"><label for="r1" title="۱">★</label>
+                </div>
+            </div>
+            {% if !logged_in %}
+            <div class="form-field">
+                <label for="author_name">نام شما</label>
+                <input type="text" id="author_name" name="author_name" class="input" value="{{ review_author }}" required>
+            </div>
+            {% endif %}
+            <div class="form-field">
+                <label for="rtitle">عنوان (اختیاری)</label>
+                <input type="text" id="rtitle" name="title" class="input">
+            </div>
+            <div class="form-field">
+                <label for="rbody">نظر شما</label>
+                <textarea id="rbody" name="body" class="input" rows="4" required placeholder="تجربه‌ی خود را بنویسید…"></textarea>
+            </div>
+            <p class="muted">نظر شما پس از تأیید کارشناسان نمایش داده می‌شود.</p>
+            <button type="submit" class="btn btn-accent">ثبت نظر</button>
+        </form>
+    </section>
+
+    <!-- پرسش و پاسخ -->
+    <section class="qa-section" id="qa">
+        <h2>پرسش و پاسخ</h2>
+        {% if !questions.is_empty() %}
+        <div class="qa-list">
+            {% for q in questions %}
+            <article class="qa-item">
+                <div class="qa-q"><span class="qa-tag">پرسش</span> {{ q.0.body }} <span class="muted qa-author">— {{ q.0.author_name }}، {{ q.0.date_fa() }}</span></div>
+                {% for a in q.1 %}
+                <div class="qa-a"><span class="qa-tag qa-tag-a">پاسخ{% if a.is_staff %} زاگرس{% endif %}</span> {{ a.body }}</div>
+                {% endfor %}
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="muted">هنوز پرسشی ثبت نشده — اولین نفر باشید!</p>
+        {% endif %}
+
+        <form method="post" action="/questions" class="qa-form">
+            <h3>پرسش خود را بپرسید</h3>
+            <input type="hidden" name="product_id" value="{{ p.id }}">
+            <input type="hidden" name="slug" value="{{ p.slug }}">
+            {% if !logged_in %}
+            <div class="form-field">
+                <label for="q_author">نام شما</label>
+                <input type="text" id="q_author" name="author_name" class="input" value="{{ review_author }}">
+            </div>
+            {% endif %}
+            <div class="form-field">
+                <label for="q_body">پرسش شما</label>
+                <textarea id="q_body" name="body" class="input" rows="3" required placeholder="درباره‌ی این محصول چه می‌خواهید بدانید؟"></textarea>
+            </div>
+            <p class="muted">پرسش شما پس از پاسخ کارشناسان نمایش داده می‌شود.</p>
+            <button type="submit" class="btn btn-accent">ثبت پرسش</button>
+        </form>
+    </section>
+
+    <!-- محصولات مرتبط -->
+    {% if !related.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>محصولات مرتبط</h2></div></div>
+        <div class="product-grid">
+            {% for p in related %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- بازدیدهای اخیر -->
+    {% if !recent.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>بازدیدهای اخیر شما</h2></div></div>
+        <div class="product-grid">
+            {% for p in recent %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+<div class="lightbox" id="lightbox"><img src="" alt=""></div>
+{% endblock %}

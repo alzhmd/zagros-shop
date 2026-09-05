@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}باشگاه مشتریان — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>باشگاه مشتریان</h1>
+
+        <!-- هیروی باشگاه: سطح فعلی + امتیاز + پیشرفت -->
+        <div class="club-hero tier-{{ tier_key }}">
+            <div class="club-hero-medal" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="M9 14.5 7.5 22l4.5-2.6 4.5 2.6L15 14.5"/><path d="m12 6 .9 1.9 2 .3-1.5 1.4.4 2L12 10.7l-1.8.9.4-2L9 8.2l2-.3z"/></svg>
+            </div>
+            <div class="club-hero-info">
+                <span class="club-hero-eyebrow">سطح شما</span>
+                <div class="club-hero-tier">{{ tier }}</div>
+                <div class="club-hero-points"><b>{{ points_fa }}</b> امتیاز</div>
+            </div>
+            <div class="club-hero-progress">
+                {% if let Some(next) = tier_next %}
+                <div class="club-bar"><i style="width: {{ progress_pct }}%"></i></div>
+                <span class="club-hero-hint">{{ to_next_fa }} امتیاز تا سطح {{ next }}</span>
+                {% else %}
+                <span class="club-hero-hint">شما در بالاترین سطح باشگاه هستید 🏆</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- نردبان سطوح -->
+        <div class="club-ladder">
+            <div class="club-step is-bronze is-done{% if tier_key == "bronze" %} is-current{% endif %}">
+                <div class="club-step-top"><span class="club-step-medal" aria-hidden="true">🥉</span><strong>برنزی</strong></div>
+                <span class="club-step-th">از ۰ امتیاز</span>
+                <ul class="club-step-perks"><li>جمع‌آوری امتیاز با هر خرید</li><li>دسترسی به باشگاه</li></ul>
+            </div>
+            <div class="club-step is-silver{% if tier_key == "silver" || tier_key == "gold" %} is-done{% endif %}{% if tier_key == "silver" %} is-current{% endif %}">
+                <div class="club-step-top"><span class="club-step-medal" aria-hidden="true">🥈</span><strong>نقره‌ای</strong></div>
+                <span class="club-step-th">از {{ silver_fa }} امتیاز</span>
+                <ul class="club-step-perks"><li>تخفیف‌های ویژه‌ی اعضا</li><li>پشتیبانی اولویت‌دار</li></ul>
+            </div>
+            <div class="club-step is-gold{% if tier_key == "gold" %} is-done is-current{% endif %}">
+                <div class="club-step-top"><span class="club-step-medal" aria-hidden="true">🥇</span><strong>طلایی</strong></div>
+                <span class="club-step-th">از {{ gold_fa }} امتیاز</span>
+                <ul class="club-step-perks"><li>ارسال رایگان</li><li>پیشنهادهای اختصاصی</li><li>هدیه‌ی تولد</li></ul>
+            </div>
+        </div>
+
+        <!-- راه‌های کسب امتیاز -->
+        <h2 class="club-h2">راه‌های کسب امتیاز</h2>
+        <div class="club-earn-grid">
+            <div class="club-earn"><span class="club-earn-ico">🛒</span><div><strong>خرید محصول</strong><span class="muted">به‌نسبت مبلغ هر سفارش امتیاز بگیرید</span></div></div>
+            <div class="club-earn"><span class="club-earn-ico">✍️</span><div><strong>ثبت دیدگاه</strong><span class="muted">برای محصولاتی که خریده‌اید نظر بنویسید</span></div></div>
+            <div class="club-earn"><span class="club-earn-ico">📨</span><div><strong>اتصال تلگرام</strong><span class="muted">حساب را به ربات وصل کنید و امتیاز هدیه بگیرید</span></div></div>
+            <div class="club-earn"><span class="club-earn-ico">🎁</span><div><strong>استفاده از امتیاز</strong><span class="muted">هنگام تسویه، امتیاز را تخفیف کنید</span></div></div>
+        </div>
+
+        <!-- اتصال تلگرام -->
+        <div class="club-telegram">
+            <h2 class="club-h2">ربات تلگرام</h2>
+            {% if telegram_linked %}
+            <div class="alert alert-success">حساب شما به ربات تلگرام متصل است. ✅ امتیاز و اطلاع‌رسانی سفارش‌ها را آنجا دریافت می‌کنید.</div>
+            {% else %}
+            <p class="muted">حسابتان را به ربات تلگرام وصل کنید تا امتیاز پاداش بگیرید و از وضعیت سفارش‌ها باخبر شوید.</p>
+            {% if let Some(code) = link_code %}
+            <div class="link-code-box">
+                <span class="muted">کد اتصال شما (تا ۱۵ دقیقه معتبر):</span>
+                <div class="link-code">{{ code }}</div>
+                {% if !bot_username.is_empty() %}
+                <a href="https://t.me/{{ bot_username }}?start={{ code }}" class="btn btn-accent btn-block" target="_blank" rel="noopener">باز کردن ربات و اتصال خودکار</a>
+                <p class="muted">یا در ربات <strong>@{{ bot_username }}</strong> دستور زیر را بفرستید:</p>
+                {% else %}
+                <p class="muted">در ربات زاگرس این دستور را بفرستید:</p>
+                {% endif %}
+                <code class="link-cmd">/start {{ code }}</code>
+            </div>
+            {% else %}
+            <form method="post" action="/account/club/link">
+                <button type="submit" class="btn btn-accent">دریافت کد اتصال تلگرام</button>
+            </form>
+            {% endif %}
+            {% endif %}
+        </div>
+
+        <h2 class="club-h2">تاریخچه‌ی امتیاز</h2>
+        {% if history.is_empty() %}
+        <div class="empty-state"><p class="muted">هنوز تراکنش امتیازی ندارید.</p></div>
+        {% else %}
+        <table class="admin-table">
+            <thead><tr><th>تغییر</th><th>بابت</th><th>توضیح</th></tr></thead>
+            <tbody>
+                {% for tx in history %}
+                <tr>
+                    <td class="{% if tx.is_earn() %}points-earn{% else %}points-spend{% endif %}">{{ tx.delta_signed() }}</td>
+                    <td>{{ tx.reason_fa() }}</td>
+                    <td class="muted">{% if let Some(n) = tx.note %}{{ n }}{% else %}—{% endif %}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

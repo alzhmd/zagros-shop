@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}تعمیرات من — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+    <section class="account-main">
+        <div class="section-head">
+            <div><h1>تعمیرات من</h1></div>
+            <a href="/repair" class="btn btn-accent">ثبت درخواست تعمیر</a>
+        </div>
+        {% if repairs.is_empty() %}
+        <div class="empty-state">
+            <h3>درخواست تعمیری ندارید</h3>
+            <p class="muted">دستگاه خراب دارید؟ همین حالا ثبت کنید.</p>
+            <a href="/repair" class="btn btn-primary">ثبت درخواست تعمیر</a>
+        </div>
+        {% else %}
+        <div class="order-list">
+            {% for r in repairs %}
+            <a href="/repair/track/{{ r.ticket_number }}" class="order-row">
+                <div class="order-row-main">
+                    <span class="order-number">#{{ r.ticket_number }} — {{ r.device_type }}</span>
+                    <span class="order-status status-{{ r.status }}">{{ r.status_fa() }}</span>
+                </div>
+                <div class="order-row-meta">
+                    <span class="muted">{{ r.method_fa() }}</span>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

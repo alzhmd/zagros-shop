@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}تنظیمات سایت — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>تنظیمات سایت</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  {% if saved %}<div class="alert alert-success">تنظیمات ذخیره شد و بلافاصله اعمال گردید.</div>{% endif %}
+
+  <form method="post" action="/admin/settings" class="repair-form">
+    <div class="form-section">
+      <h3>عمومی</h3>
+      <div class="form-grid">
+        <div class="form-field form-field-full">
+          <label for="site_name">نام سایت</label>
+          <input type="text" id="site_name" name="site_name" class="input" value="{{ s_site_name }}" required>
+        </div>
+        <div class="form-field">
+          <label for="contact_phone">تلفن تماس</label>
+          <input type="text" id="contact_phone" name="contact_phone" class="input" value="{{ contact_phone }}">
+        </div>
+        <div class="form-field">
+          <label for="contact_address">نشانی/توضیح تماس</label>
+          <input type="text" id="contact_address" name="contact_address" class="input" value="{{ contact_address }}">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>فروش و ارسال</h3>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="shipping_toman">هزینه‌ی ارسال (تومان)</label>
+          <input type="text" id="shipping_toman" name="shipping_toman" class="input" value="{{ shipping_toman }}" inputmode="numeric">
+          <small class="muted">۰ = ارسال رایگان.</small>
+        </div>
+        <div class="form-field">
+          <label for="cod_province">استان مجاز پرداخت در محل</label>
+          <input type="text" id="cod_province" name="cod_province" class="input" value="{{ cod_province }}" required>
+        </div>
+        <div class="form-field">
+          <label for="rial_per_point">نرخ امتیاز (ریال به ازای ۱ امتیاز)</label>
+          <input type="text" id="rial_per_point" name="rial_per_point" class="input" value="{{ rial_per_point }}" inputmode="numeric">
+          <small class="muted">مثلاً ۱۰۰۰۰۰ یعنی هر ۱۰٬۰۰۰ تومان = ۱ امتیاز.</small>
+        </div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="payments_enabled" value="on"{% if payments_enabled %} checked{% endif %}> پرداخت آنلاین فعال باشد</label>
+      </div>
+    </div>
+
+    <div class="form-section admin-subsection">
+      <h3>روش‌های ارسال</h3>
+      <div class="form-grid">
+        <div class="form-field"><label>ارسال عادی — هزینه (تومان)</label><input type="text" name="ship_normal_toman" class="input" value="{{ ship_normal_toman }}" inputmode="numeric"></div>
+        <div class="form-field"><label>ارسال عادی — زمان</label><input type="text" name="ship_normal_eta" class="input" value="{{ ship_normal_eta }}"></div>
+        <div class="form-field"><label>پیشتاز — هزینه (تومان)</label><input type="text" name="ship_express_toman" class="input" value="{{ ship_express_toman }}" inputmode="numeric"></div>
+        <div class="form-field"><label>پیشتاز — زمان</label><input type="text" name="ship_express_eta" class="input" value="{{ ship_express_eta }}"></div>
+        <div class="form-field"><label>فوری — هزینه (تومان)</label><input type="text" name="ship_instant_toman" class="input" value="{{ ship_instant_toman }}" inputmode="numeric"></div>
+        <div class="form-field"><label>فوری — زمان</label><input type="text" name="ship_instant_eta" class="input" value="{{ ship_instant_eta }}"></div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="ship_express_on" value="on"{% if ship_express_on %} checked{% endif %}> ارسال پیشتاز فعال</label>
+        <label class="check-inline"><input type="checkbox" name="ship_instant_on" value="on"{% if ship_instant_on %} checked{% endif %}> ارسال فوری فعال</label>
+      </div>
+    </div>
+
+    <div class="form-section admin-subsection">
+      <h3>باشگاه مشتریان و کارت هدیه</h3>
+      <div class="form-grid">
+        <div class="form-field"><label>آستانه‌ی سطح نقره‌ای (امتیاز)</label><input type="text" name="silver_threshold" class="input" value="{{ silver_threshold }}" inputmode="numeric"></div>
+        <div class="form-field"><label>آستانه‌ی سطح طلایی (امتیاز)</label><input type="text" name="gold_threshold" class="input" value="{{ gold_threshold }}" inputmode="numeric"></div>
+        <div class="form-field"><label>کارت هدیه‌ی خوش‌آمد — مبلغ (تومان)</label><input type="text" name="gift_signup_toman" class="input" value="{{ gift_signup_toman }}" inputmode="numeric"></div>
+        <div class="form-field"><label>کارت هدیه‌ی خوش‌آمد — اعتبار (روز)</label><input type="text" name="gift_signup_days" class="input" value="{{ gift_signup_days }}" inputmode="numeric"></div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="gift_signup_on" value="on"{% if gift_signup_on %} checked{% endif %}> صدور کارت هدیه برای کاربران جدید</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-accent btn-lg">ذخیره‌ی تنظیمات</button>
+    </div>
+  </form>
+
+  <div class="form-section admin-subsection">
+    <h3>ربات تلگرام و رازها</h3>
+    <p class="muted">این مقادیر به‌دلایل امنیتی از طریق متغیرهای محیطی / <span class="mono">config.local.toml</span> تنظیم می‌شوند و اینجا قابل‌ویرایش نیستند.</p>
+    <div class="info-row"><span class="muted">وضعیت ربات</span><span>{% if bot_active %}<span class="order-status status-active">فعال</span>{% if !bot_username.is_empty() %} @{{ bot_username }}{% endif %}{% else %}<span class="order-status status-closed">غیرفعال</span>{% endif %}</span></div>
+    <div class="info-row"><span class="muted">توکن ربات</span><span class="mono">تنظیم‌شده از ENV</span></div>
+    <div class="info-row"><span class="muted">مرچنت درگاه / secret کوکی</span><span class="mono">تنظیم‌شده از ENV</span></div>
+  </div>
+</div>
+{% endblock %}

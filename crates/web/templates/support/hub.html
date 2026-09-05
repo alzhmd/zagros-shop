@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}پشتیبانی — {{ site_name }}{% endblock %}
+{% block description %}پشتیبانی زاگرس — ثبت تیکت و گفت‌وگوی زنده با کارشناسان فروش و فنی.{% endblock %}
+
+{% block content %}
+<div class="container section">
+  <div class="support-hero">
+    <div>
+      <h1>پشتیبانی زاگرس</h1>
+      <p class="lead">سؤال یا مشکلی دارید؟ تیکت ثبت کنید یا همین حالا گفت‌وگوی زنده را آغاز کنید.</p>
+    </div>
+    <a href="/support/chat" class="btn btn-accent btn-lg">شروع گفت‌وگوی زنده</a>
+  </div>
+
+  <div class="support-grid">
+    <section class="support-col">
+      <h2>ثبت تیکت جدید</h2>
+      <form method="post" action="/support/ticket" class="repair-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="full_name">نام و نام خانوادگی</label>
+            <input type="text" id="full_name" name="full_name" class="input" value="{{ prefill_name }}" required>
+          </div>
+          <div class="form-field">
+            <label for="email">ایمیل (اختیاری)</label>
+            <input type="email" id="email" name="email" class="input" value="{{ prefill_email }}">
+          </div>
+          <div class="form-field">
+            <label for="department">بخش</label>
+            <select id="department" name="department" class="input">
+              <option value="general">عمومی</option>
+              <option value="sales">فروش</option>
+              <option value="technical">فنی</option>
+              <option value="billing">مالی</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label for="priority">اولویت</label>
+            <select id="priority" name="priority" class="input">
+              <option value="low">کم</option>
+              <option value="normal" selected>عادی</option>
+              <option value="high">بالا</option>
+            </select>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="subject">موضوع</label>
+            <input type="text" id="subject" name="subject" class="input" required>
+          </div>
+          <div class="form-field form-field-full">
+            <label for="body">شرح درخواست</label>
+            <textarea id="body" name="body" class="input" rows="5" required placeholder="درخواست خود را با جزئیات بنویسید…"></textarea>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-accent btn-lg">ثبت تیکت</button>
+      </form>
+    </section>
+
+    <aside class="support-col support-aside">
+      {% if logged_in %}
+      <h2>تیکت‌های من</h2>
+      {% if my_tickets.is_empty() %}
+      <div class="empty-state"><p class="muted">هنوز تیکتی ثبت نکرده‌اید.</p></div>
+      {% else %}
+      <div class="ticket-list">
+        {% for t in my_tickets %}
+        <a href="/support/ticket/{{ t.ticket_number }}" class="ticket-row">
+          <div class="ticket-row-main">
+            <span class="ticket-subject">{{ t.subject }}</span>
+            <span class="order-status status-{{ t.status }}">{{ t.status_fa() }}</span>
+          </div>
+          <span class="muted">#{{ t.ticket_number }} — {{ t.department_fa() }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% else %}
+      <div class="info-box">
+        <h3>حساب کاربری</h3>
+        <p class="muted">برای پیگیری آسان تیکت‌ها <a href="/account/login">وارد شوید</a>.</p>
+      </div>
+      {% endif %}
+
+      <div class="info-box">
+        <h3>پیگیری تیکت</h3>
+        <p class="muted">شماره‌ی تیکت خود را وارد کنید.</p>
+        <form method="post" action="/support/ticket-lookup" class="lookup-inline">
+          <input type="text" name="ticket" class="input" inputmode="numeric" placeholder="مثلاً ۱۲۳" required>
+          <button type="submit" class="btn btn-primary">پیگیری</button>
+        </form>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

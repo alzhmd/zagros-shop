@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}آدرس‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>دفترچه‌ی آدرس</h1>
+
+        {% if !addresses.is_empty() %}
+        <div class="address-list">
+            {% for a in addresses %}
+            <div class="address-card{% if a.is_default %} is-default{% endif %}">
+                <div class="address-card-body">
+                    <strong>{{ a.receiver }}</strong> <span class="muted" dir="ltr">{{ a.phone }}</span>
+                    {% if a.is_default %}<span class="badge badge-featured">پیش‌فرض</span>{% endif %}
+                    <div class="muted">{{ a.province }}، {{ a.city }} — {{ a.line }}</div>
+                    {% if let Some(pc) = a.postal_code %}<div class="muted">کد پستی: {{ pc }}</div>{% endif %}
+                </div>
+                <div class="address-card-actions">
+                    {% if !a.is_default %}
+                    <form method="post" action="/account/addresses/{{ a.id }}/default" class="inline-form">
+                        <button type="submit" class="btn btn-ghost btn-sm">پیش‌فرض</button>
+                    </form>
+                    {% endif %}
+                    <form method="post" action="/account/addresses/{{ a.id }}/delete" class="inline-form"
+                          onsubmit="return confirm('حذف این آدرس؟')">
+                        <button type="submit" class="btn btn-ghost btn-sm btn-danger">حذف</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state"><p class="muted">هنوز آدرسی ثبت نکرده‌اید.</p></div>
+        {% endif %}
+
+        <h2>افزودن آدرس جدید</h2>
+        <form method="post" action="/account/addresses" class="repair-form">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="receiver">نام تحویل‌گیرنده</label>
+                    <input type="text" id="receiver" name="receiver" class="input" value="{% if let Some(n) = user.full_name %}{{ n }}{% endif %}" required>
+                </div>
+                <div class="form-field">
+                    <label for="phone">شماره تماس</label>
+                    <input type="tel" id="phone" name="phone" class="input" value="{{ user.mobile }}" required>
+                </div>
+                <div class="form-field">
+                    <label for="province">استان</label>
+                    <select id="province" name="province" class="input" required>
+                        {% include "partials/provinces.html" %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="city">شهر</label>
+                    <input type="text" id="city" name="city" class="input" required>
+                </div>
+                <div class="form-field">
+                    <label for="postal_code">کد پستی (اختیاری)</label>
+                    <input type="text" id="postal_code" name="postal_code" class="input" dir="ltr">
+                </div>
+                <div class="form-field form-field-full">
+                    <label for="line">نشانی کامل</label>
+                    <textarea id="line" name="line" class="input" rows="2" required></textarea>
+                </div>
+            </div>
+            <label class="check-inline"><input type="checkbox" name="make_default" value="on"> به‌عنوان آدرس پیش‌فرض</label>
+            <button type="submit" class="btn btn-accent btn-lg">افزودن آدرس</button>
+        </form>
+    </section>
+</div>
+{% endblock %}

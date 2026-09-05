@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% block title %}دیدگاه‌ها و پرسش‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main" x-data="{ tab: 'reviews' }">
+        <h1>دیدگاه‌ها و پرسش‌ها</h1>
+
+        <div class="myrev-stats">
+            <div class="myrev-stat"><b>{{ review_count_fa }}</b><span>دیدگاه ثبت‌شده</span></div>
+            <div class="myrev-stat is-ok"><b>{{ approved_count_fa }}</b><span>تأییدشده</span></div>
+            <div class="myrev-stat is-wait"><b>{{ pending_count_fa }}</b><span>در انتظار بررسی</span></div>
+            <div class="myrev-stat"><b>{{ question_count_fa }}</b><span>پرسش</span></div>
+        </div>
+
+        <div class="filter-bar myrev-tabs">
+            <button type="button" class="filter-chip" :class="{active: tab==='reviews'}" @click="tab='reviews'">دیدگاه‌های من ({{ review_count_fa }})</button>
+            <button type="button" class="filter-chip" :class="{active: tab==='questions'}" @click="tab='questions'">پرسش‌های من ({{ question_count_fa }})</button>
+        </div>
+
+        <!-- دیدگاه‌ها -->
+        <div x-show="tab==='reviews'" x-cloak>
+        {% if reviews.is_empty() %}
+            <div class="empty-state">
+                <h3>هنوز دیدگاهی ثبت نکرده‌اید</h3>
+                <p class="muted">درباره‌ی محصولاتی که خریده‌اید نظر بنویسید و امتیاز باشگاه بگیرید.</p>
+                <a href="/products" class="btn btn-primary">مشاهده‌ی محصولات</a>
+            </div>
+        {% else %}
+            <div class="myrev-list">
+            {% for r in reviews %}
+                <article class="myrev-card">
+                    <a class="myrev-thumb" href="/product/{{ r.product_slug }}" aria-hidden="true">
+                        {% if let Some(img) = r.primary_image %}<img src="{{ img }}" alt="" loading="lazy">{% else %}<span class="myrev-noimg">📦</span>{% endif %}
+                    </a>
+                    <div class="myrev-body">
+                        <div class="myrev-top">
+                            <a class="myrev-name" href="/product/{{ r.product_slug }}">{{ r.product_name }}</a>
+                            <span class="acct-chip is-{{ r.status_key() }}">{{ r.status_fa() }}</span>
+                        </div>
+                        <div class="myrev-meta">
+                            <span class="stars" aria-hidden="true">{{ r.stars_str() }}</span>
+                            <span class="muted">{{ r.date_fa() }}</span>
+                            {% if r.is_verified %}<span class="review-verified">✓ خرید تأییدشده</span>{% endif %}
+                            {% if r.helpful_count > 0 %}<span class="muted myrev-helpful">👍 {{ r.helpful_fa() }} نفر مفید دانستند</span>{% endif %}
+                        </div>
+                        {% if let Some(t) = r.title %}<strong class="myrev-title">{{ t }}</strong>{% endif %}
+                        <p class="myrev-text">{{ r.body }}</p>
+                        <div class="myrev-actions">
+                            <a class="oact" href="/product/{{ r.product_slug }}#reviews">ویرایش دیدگاه</a>
+                            <a class="oact oact-ghost" href="/product/{{ r.product_slug }}#reviews">مشاهده در صفحه‌ی محصول</a>
+                        </div>
+                    </div>
+                </article>
+            {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+
+        <!-- پرسش‌ها -->
+        <div x-show="tab==='questions'" x-cloak>
+        {% if questions.is_empty() %}
+            <div class="empty-state">
+                <h3>پرسشی ثبت نکرده‌اید</h3>
+                <p class="muted">هر سؤالی درباره‌ی محصولات دارید بپرسید؛ کارشناسان ما پاسخ می‌دهند.</p>
+                <a href="/products" class="btn btn-primary">مشاهده‌ی محصولات</a>
+            </div>
+        {% else %}
+            <div class="myq-list">
+            {% for q in questions %}
+                <article class="myq-card">
+                    <div class="myrev-top">
+                        <a class="myrev-name" href="/product/{{ q.product_slug }}">{{ q.product_name }}</a>
+                        <span class="acct-chip is-{{ q.status_key() }}">{{ q.status_fa() }}</span>
+                    </div>
+                    <div class="myq-q"><span class="qa-tag">پرسش</span> {{ q.body }} <span class="muted qa-author">— {{ q.date_fa() }}</span></div>
+                    {% if let Some(a) = q.answer %}
+                    <div class="myq-a"><span class="qa-tag qa-tag-a">پاسخ زاگرس</span> {{ a }}</div>
+                    {% else %}
+                    <p class="muted myq-wait">در انتظار پاسخ کارشناسان…</p>
+                    {% endif %}
+                </article>
+            {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}

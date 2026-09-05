@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}تسویه‌حساب — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <h1>تسویه‌حساب</h1>
+    <form method="post" action="/checkout" class="checkout-layout">
+        <div class="checkout-form">
+            {% if !addresses.is_empty() %}
+            <h3>انتخاب آدرس</h3>
+            <div class="address-picker" x-data="{ sel: '{{ default_address_id }}' }">
+                {% for a in addresses %}
+                <label class="address-option" :class="{ 'is-selected': sel === '{{ a.id }}' }">
+                    <input type="radio" name="address_id" value="{{ a.id }}" x-model="sel"
+                           {% if a.is_default %}checked{% endif %}>
+                    <div>
+                        <strong>{{ a.receiver }}</strong> <span class="muted" dir="ltr">{{ a.phone }}</span>
+                        {% if a.is_default %}<span class="badge badge-featured">پیش‌فرض</span>{% endif %}
+                        <div class="muted">{{ a.province }}، {{ a.city }} — {{ a.line }}</div>
+                    </div>
+                </label>
+                {% endfor %}
+                <label class="address-option" :class="{ 'is-selected': sel === 'new' }">
+                    <input type="radio" name="address_id" value="new" x-model="sel">
+                    <strong>آدرس جدید</strong>
+                </label>
+
+                <div x-show="sel === 'new'" x-cloak class="form-grid" style="margin-top:1rem">
+                    <div class="form-field">
+                        <label for="receiver">نام تحویل‌گیرنده</label>
+                        <input type="text" id="receiver" name="receiver" class="input" value="{{ user_name }}">
+                    </div>
+                    <div class="form-field">
+                        <label for="phone">شماره تماس</label>
+                        <input type="tel" id="phone" name="phone" class="input" value="{{ user_mobile }}">
+                    </div>
+                    <div class="form-field">
+                        <label for="province">استان</label>
+                        <select id="province" name="province" class="input">
+                            {% include "partials/provinces.html" %}
+                        </select>
+                    </div>
+                    <div class="form-field">
+                        <label for="city">شهر</label>
+                        <input type="text" id="city" name="city" class="input">
+                    </div>
+                    <div class="form-field form-field-full">
+                        <label for="address">نشانی کامل</label>
+                        <textarea id="address" name="address" class="input" rows="3"></textarea>
+                    </div>
+                    <label class="check-inline"><input type="checkbox" name="save_address" value="on"> ذخیره‌ی این آدرس برای خریدهای بعدی</label>
+                </div>
+            </div>
+            {% else %}
+            <h3>اطلاعات ارسال</h3>
+            <input type="hidden" name="address_id" value="new">
+            <div class="form-grid">
+                <div class="form-field">
+                    <label for="receiver">نام تحویل‌گیرنده</label>
+                    <input type="text" id="receiver" name="receiver" class="input" value="{{ user_name }}" required>
+                </div>
+                <div class="form-field">
+                    <label for="phone">شماره تماس</label>
+                    <input type="tel" id="phone" name="phone" class="input" value="{{ user_mobile }}" required>
+                </div>
+                <div class="form-field">
+                    <label for="province">استان</label>
+                    <select id="province" name="province" class="input" required>
+                        {% include "partials/provinces.html" %}
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label for="city">شهر</label>
+                    <input type="text" id="city" name="city" class="input" required>
+                </div>
+                <div class="form-field form-field-full">
+                    <label for="address">نشانی کامل</label>
+                    <textarea id="address" name="address" class="input" rows="3" required></textarea>
+                </div>
+                <label class="check-inline"><input type="checkbox" name="save_address" value="on"> ذخیره‌ی این آدرس</label>
+            </div>
+            {% endif %}
+
+            <div class="form-field form-field-full" style="margin-top:1rem">
+                <label for="note">یادداشت سفارش (اختیاری)</label>
+                <textarea id="note" name="note" class="input" rows="2" placeholder="توضیح برای پیک یا زمان تحویل…"></textarea>
+            </div>
+
+            <h3>روش ارسال</h3>
+            <div class="payment-methods shipping-methods">
+                {% for m in shipping_methods %}
+                <label class="payment-option">
+                    <input type="radio" name="shipping_method" value="{{ m.key }}"{% if loop.first %} checked{% endif %}
+                           hx-post="/checkout/coupon" hx-include="#coupon_code, [name='shipping_method']:checked"
+                           hx-target="#checkoutSummary" hx-swap="outerHTML">
+                    <span>
+                        <strong>{{ m.label }}</strong>
+                        <small class="muted">{{ m.cost_fa() }}{% if !m.eta.is_empty() %} — {{ m.eta }}{% endif %}</small>
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+
+            <h3>روش پرداخت</h3>
+            <div class="payment-methods">
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="online" checked>
+                    <span>پرداخت آنلاین (درگاه بانکی)</span>
+                </label>
+                <label class="payment-option">
+                    <input type="radio" name="payment_method" value="cod">
+                    <span>پرداخت در محل <small class="muted">(فقط استان {{ cod_province }})</small></span>
+                </label>
+            </div>
+        </div>
+
+        <aside class="checkout-summary">
+            <h3>سفارش شما</h3>
+            <ul class="checkout-items">
+                {% for it in items %}
+                <li>
+                    <span>{{ it.product_name }} <small class="muted">×{{ it.qty }}</small></span>
+                    <span>{{ it.line_total_fa() }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+            <div class="form-field coupon-field">
+                <label for="coupon_code">کد تخفیف</label>
+                <div class="coupon-apply">
+                    <input type="text" id="coupon_code" name="coupon_code" class="input"
+                           placeholder="کد تخفیف" autocomplete="off">
+                    <button type="button" class="btn btn-outline"
+                            hx-post="/checkout/coupon" hx-include="#coupon_code, [name='shipping_method']:checked"
+                            hx-target="#checkoutSummary" hx-swap="outerHTML">اعمال</button>
+                </div>
+            </div>
+
+            {% if has_points %}
+            <label class="check-inline points-redeem">
+                <input type="checkbox" name="use_points" value="on">
+                استفاده از {{ points_fa }} امتیاز باشگاه (تا {{ points_value_fa }})
+            </label>
+            {% endif %}
+
+            {% if has_wallet %}
+            <label class="check-inline points-redeem">
+                <input type="checkbox" name="use_wallet" value="on">
+                استفاده از موجودی کیف پول ({{ wallet_fa }})
+            </label>
+            {% endif %}
+
+            {% include "partials/checkout_summary.html" %}
+
+            <button type="submit" class="btn btn-accent btn-block btn-lg">ثبت و پرداخت</button>
+        </aside>
+    </form>
+</div>
+{% endblock %}

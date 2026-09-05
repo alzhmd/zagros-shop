@@ -1,0 +1,10 @@
+<form method="post" action="/wishlist/toggle" class="wishlist-form"
+      hx-post="/wishlist/toggle" hx-swap="outerHTML">
+    <input type="hidden" name="product_id" value="{{ product_id }}">
+    <button type="submit" class="icon-act wishlist-heart{% if in_wishlist %} is-active{% endif %}"
+            aria-label="{% if in_wishlist %}حذف از علاقه‌مندی‌ها{% else %}افزودن به علاقه‌مندی‌ها{% endif %}"
+            aria-pressed="{% if in_wishlist %}true{% else %}false{% endif %}"
+            title="{% if in_wishlist %}در علاقه‌مندی‌ها{% else %}افزودن به علاقه‌مندی‌ها{% endif %}">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21.2l7.8-7.7 1-1a5.5 5.5 0 0 0 0-7.9z"/></svg>
+    </button>
+</form>

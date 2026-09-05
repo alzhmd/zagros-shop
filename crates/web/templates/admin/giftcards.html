@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}کارت هدیه — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>کارت هدیه</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  {% if let Some(m) = flash %}<div class="alert alert-success">{{ m }}</div>{% endif %}
+
+  <form method="post" action="/admin/giftcards" class="variant-add-row">
+    <input type="text" name="amount_toman" class="input" placeholder="مبلغ (تومان)" inputmode="numeric" required>
+    <input type="text" name="days" class="input" placeholder="اعتبار (روز، اختیاری)" inputmode="numeric">
+    <button type="submit" class="btn btn-accent">صدور کارت هدیه</button>
+  </form>
+
+  {% if cards.is_empty() %}
+  <div class="empty-state"><p class="muted">کارتی صادر نشده.</p></div>
+  {% else %}
+  <table class="admin-table">
+    <thead><tr><th>کد</th><th>مبلغ اولیه</th><th>موجودی</th><th>وضعیت</th></tr></thead>
+    <tbody>
+      {% for c in cards %}
+      <tr>
+        <td><span class="mono">{{ c.code }}</span></td>
+        <td>{{ c.initial_fa() }}</td>
+        <td>{{ c.balance_fa() }}</td>
+        <td>{% if c.redeemed_at.is_some() %}استفاده‌شده{% else %}فعال{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

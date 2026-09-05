@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}امنیت و دستگاه‌ها — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container account-layout">
+    {% include "account/_sidebar.html" %}
+
+    <section class="account-main">
+        <h1>امنیت و دستگاه‌ها</h1>
+
+        <div class="sess-intro">
+            <span class="sess-intro-ic" aria-hidden="true">🛡️</span>
+            <div>
+                <strong>دستگاه‌های واردشده به حساب شما</strong>
+                <p class="muted">اگر دستگاهی را نمی‌شناسید، از آن خارج شوید. برای امنیت بیشتر، رمز یا کد ورود خود را در اختیار کسی نگذارید.</p>
+            </div>
+        </div>
+
+        {% if sessions.is_empty() %}
+        <div class="empty-state">
+            <h3>نشست فعالی ثبت نشده است</h3>
+            <p class="muted">مدیریت دستگاه‌ها از ورود بعدی شما فعال می‌شود.</p>
+        </div>
+        {% else %}
+        <div class="sess-head">
+            <span class="muted">{{ session_count_fa }} دستگاه فعال</span>
+            {% if has_others %}
+            <form method="post" action="/account/sessions/revoke-others" onsubmit="return confirm('از همه‌ی دستگاه‌های دیگر خارج می‌شوید؟');">
+                <button type="submit" class="btn btn-ghost btn-sm">خروج از سایر دستگاه‌ها</button>
+            </form>
+            {% endif %}
+        </div>
+
+        <div class="sess-list">
+            {% for d in sessions %}
+            <article class="sess-card{% if d.is_current %} is-current{% endif %}">
+                <span class="sess-ic" aria-hidden="true">{{ d.icon }}</span>
+                <div class="sess-body">
+                    <div class="sess-top">
+                        <strong class="sess-label">{{ d.label }}</strong>
+                        {% if d.is_current %}<span class="sess-badge">این دستگاه</span>{% endif %}
+                    </div>
+                    <div class="sess-meta">
+                        <span>🌐 {{ d.ip_fa }}</span>
+                        <span>ورود: {{ d.created_fa }}</span>
+                        <span>آخرین فعالیت: {{ d.last_seen_fa }}</span>
+                    </div>
+                </div>
+                <form method="post" action="/account/sessions/revoke" class="sess-act"
+                      onsubmit="return confirm('{% if d.is_current %}از این دستگاه خارج می‌شوید؟{% else %}این دستگاه از حساب خارج شود؟{% endif %}');">
+                    <input type="hidden" name="id" value="{{ d.id }}">
+                    <button type="submit" class="oact{% if d.is_current %} oact-danger{% endif %}">{% if d.is_current %}خروج از این دستگاه{% else %}خروج{% endif %}</button>
+                </form>
+            </article>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

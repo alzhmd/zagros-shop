@@ -1,0 +1,43 @@
+[server]
+host = "0.0.0.0"
+port = 8080
+base_url = "http://localhost:8080"
+# در تولید حتماً از طریق ENV یک secret تصادفی بلند (۶۴+ کاراکتر) بده:
+#   ZAGROS__SERVER__COOKIE_SECRET=...
+cookie_secret = "zagros-dev-only-cookie-secret-change-me-in-production-please-now"
+
+[database]
+url = "postgres://zagros:zagros_dev_2026@127.0.0.1:5432/zagros"
+
+[sms]
+# none = حالت توسعه (کد در لاگ چاپ می‌شود) | kavenegar | smsir
+provider = "none"
+api_key = ""
+template = ""
+
+[payment]
+# zarinpal | zibal — merchant تستی زیبال = "zibal"
+provider = "zibal"
+merchant = "zibal"
+# تا قبل از خرید درگاه واقعی، پرداخت آنلاین غیرفعال است (فقط پرداخت در محل زنجان)
+enabled = false
+
+[telegram]
+# توکن ربات راز است؛ آن را در config/config.local.toml (gitignored) یا
+# از طریق ENV بده: ZAGROS__TELEGRAM__TOKEN=...  و  ZAGROS__TELEGRAM__ENABLED=true
+token = ""
+enabled = false
+
+[email]
+# SMTP خودمیزبان برای ایمیل تأیید سفارش و پاسخ تیکت.
+# اگر smtp_host خالی باشد، ایمیل فقط در لاگ چاپ می‌شود (حالت کنسول/توسعه).
+smtp_host = ""
+smtp_port = 587
+smtp_user = ""
+smtp_pass = ""
+from = "زاگرس <no-reply@zagros.local>"
+
+[admin]
+# موبایل مدیر اول؛ در هر راه‌اندازی به نقش admin ارتقا می‌یابد و سپس با OTP وارد می‌شود.
+# برای تولید بهتر است از ENV داده شود: ZAGROS__ADMIN__MOBILE=09xxxxxxxxx
+mobile = ""

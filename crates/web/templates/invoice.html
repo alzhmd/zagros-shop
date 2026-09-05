@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>فاکتور سفارش #{{ order_number_fa }} — {{ site_name }}</title>
+<link rel="stylesheet" href="/assets/css/app.css?v=10">
+<style>
+  body { background: #fff; padding: 2rem; }
+  .invoice { max-width: 800px; margin-inline: auto; }
+  .inv-head { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid var(--color-primary); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+  .inv-table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+  .inv-table th, .inv-table td { border: 1px solid var(--color-border); padding: .6rem; text-align: start; }
+  .inv-table th { background: var(--color-muted-bg); }
+  .inv-totals { margin-inline-start: auto; max-width: 320px; }
+  .inv-totals .summary-row { display: flex; justify-content: space-between; padding: .35rem 0; }
+  .inv-actions { margin: 1.5rem 0; }
+  @media print { .inv-actions { display: none; } body { padding: 0; } .tabbar { display: none !important; } }
+</style>
+</head>
+<body>
+<div class="invoice">
+  <div class="inv-actions">
+    <button type="button" class="btn btn-accent" onclick="window.print()">چاپ / ذخیره PDF</button>
+    <a href="/order/{{ order.id }}" class="btn btn-ghost">بازگشت به سفارش</a>
+  </div>
+
+  <div class="inv-head">
+    <div>
+      <div class="brand-mark" style="font-size:1.4rem;color:var(--color-primary)">{{ site_name }}</div>
+      <p class="muted">{{ contact_address }}</p>
+      {% if !contact_phone.is_empty() %}<p class="muted" dir="ltr">{{ contact_phone }}</p>{% endif %}
+    </div>
+    <div style="text-align:end">
+      <h1 style="font-size:1.3rem">فاکتور فروش</h1>
+      <p>شماره سفارش: <strong>#{{ order_number_fa }}</strong></p>
+      <p class="muted mono">{{ date_fa }}</p>
+    </div>
+  </div>
+
+  <div class="inv-buyer">
+    <strong>گیرنده:</strong>
+    {% if let Some(r) = order.ship_receiver %}{{ r }}{% endif %}
+    {% if let Some(p) = order.ship_phone %} — <span dir="ltr">{{ p }}</span>{% endif %}
+    <div class="muted">
+      {% if let Some(pr) = order.ship_province %}{{ pr }}{% endif %}{% if let Some(c) = order.ship_city %}، {{ c }}{% endif %}{% if let Some(a) = order.ship_address %} — {{ a }}{% endif %}
+    </div>
+  </div>
+
+  <table class="inv-table">
+    <thead><tr><th>کالا</th><th>تعداد</th><th>قیمت واحد</th><th>جمع</th></tr></thead>
+    <tbody>
+      {% for it in items %}
+      <tr>
+        <td>{{ it.product_name }}{% if let Some(v) = it.variant_title %} — {{ v }}{% endif %}</td>
+        <td>{{ it.qty }}</td>
+        <td>{{ it.unit_price_fa() }}</td>
+        <td>{{ it.line_total_fa() }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="inv-totals">
+    <div class="summary-row"><span class="muted">جمع اقلام</span><span>{{ order.subtotal_fa() }}</span></div>
+    {% if order.discount > 0 %}<div class="summary-row"><span class="muted">تخفیف</span><span>−{{ order.discount_fa() }}</span></div>{% endif %}
+    <div class="summary-row"><span class="muted">هزینه‌ی ارسال{% if let Some(sm) = order.shipping_method %} ({{ sm }}){% endif %}</span><span>{{ order.shipping_fa() }}</span></div>
+    <div class="summary-row" style="border-top:1px solid var(--color-border);font-weight:700"><span>مبلغ کل</span><span>{{ order.total_fa() }}</span></div>
+  </div>
+
+  <p class="muted" style="margin-top:2rem;text-align:center">از خرید شما سپاسگزاریم — {{ site_name }}</p>
+</div>
+</body>
+</html>

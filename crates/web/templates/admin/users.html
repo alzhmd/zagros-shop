@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}مدیریت کاربران — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>مدیریت کاربران</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="admin-toolbar">
+    <span class="muted">{{ total_count }} کاربر</span>
+    <form method="get" action="/admin/users" class="lookup-inline">
+      <input type="text" name="q" class="input" value="{{ search }}" placeholder="جستجوی موبایل یا نام">
+      <button type="submit" class="btn btn-primary">جستجو</button>
+    </form>
+  </div>
+
+  {% if users.is_empty() %}
+  <div class="empty-state"><h3>کاربری یافت نشد</h3></div>
+  {% else %}
+  <table class="admin-table">
+    <thead>
+      <tr><th>موبایل</th><th>نام</th><th>نقش</th><th>امتیاز</th><th>سفارش</th><th>تلگرام</th><th>وضعیت</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td class="mono">{{ u.mobile }}</td>
+        <td>{% if let Some(n) = u.full_name %}{{ n }}{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{{ u.role_fa() }}</td>
+        <td>{{ u.points }}</td>
+        <td>{{ u.order_count }}</td>
+        <td>{% if u.telegram_linked() %}<span class="badge badge-featured">متصل</span>{% else %}<span class="muted">—</span>{% endif %}</td>
+        <td>{% if u.is_active %}<span class="order-status status-active">فعال</span>{% else %}<span class="order-status status-cancelled">مسدود</span>{% endif %}</td>
+        <td class="row-actions"><a href="/admin/users/{{ u.id }}" class="btn btn-ghost">مدیریت</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endblock %}

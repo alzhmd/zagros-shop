@@ -1,0 +1,37 @@
+<aside class="account-sidebar">
+    <div class="account-user">
+        <div class="account-avatar" aria-hidden="true">ز</div>
+        <div>
+            <div class="account-name">{% if let Some(n) = user.full_name %}{{ n }}{% else %}کاربر زاگرس{% endif %}</div>
+            <div class="muted">{{ user.mobile }}</div>
+        </div>
+    </div>
+    <nav class="account-nav" id="accountNav">
+        <a href="/account">داشبورد</a>
+        <a href="/account/orders">سفارش‌های من</a>
+        <a href="/account/returns">مرجوعی‌ها</a>
+        <a href="/account/repairs">تعمیرات من</a>
+        <a href="/account/reviews">دیدگاه‌ها و پرسش‌ها</a>
+        <a href="/account/wallet">کیف پول</a>
+        <a href="/account/notifications">اعلان‌ها</a>
+        <a href="/account/wishlist">علاقه‌مندی‌ها</a>
+        <a href="/account/addresses">آدرس‌ها</a>
+        <a href="/account/club">باشگاه مشتریان</a>
+        <a href="/account/profile">ویرایش پروفایل</a>
+        <a href="/account/sessions">امنیت و دستگاه‌ها</a>
+        <a href="/support">تیکت‌های پشتیبانی</a>
+    </nav>
+    <div class="account-points">
+        <span class="muted">امتیاز باشگاه</span>
+        <strong>{{ points_fa }}</strong>
+    </div>
+    <form method="post" action="/account/logout">
+        <button type="submit" class="btn btn-ghost btn-block">خروج از حساب</button>
+    </form>
+</aside>
+<script>
+(function(){var p=location.pathname;var best=null,bl=-1;
+document.querySelectorAll('#accountNav a').forEach(function(a){var h=a.getAttribute('href');
+var m=h==='/account'?p==='/account':p.indexOf(h)===0;if(m&&h.length>bl){best=a;bl=h.length;}});
+if(best)best.classList.add('active');})();
+</script>

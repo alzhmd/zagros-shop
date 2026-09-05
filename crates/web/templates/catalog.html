@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}{{ result_label }} — {{ site_name }}{% endblock %}
+{% block description %}خرید {{ result_label }} از فروشگاه زاگرس با بهترین قیمت و گارانتی معتبر.{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ canonical }}">{% endblock %}
+
+{% block content %}
+<div class="container catalog-layout">
+    <div id="filterBackdrop" class="filter-backdrop" onclick="document.getElementById('filterPanel').classList.remove('is-open');this.classList.remove('is-open')"></div>
+    <aside class="filter-sidebar" id="filterPanel" aria-label="فیلترها">
+        <div class="filter-drawer-head">
+            <strong>فیلترها</strong>
+            <button type="button" class="filter-drawer-close" aria-label="بستن"
+                    onclick="document.getElementById('filterPanel').classList.remove('is-open');document.getElementById('filterBackdrop').classList.remove('is-open')">✕</button>
+        </div>
+        <form method="get" action="/products" class="filter-form">
+            <div class="filter-group">
+                <h3>جستجو</h3>
+                <input type="search" name="q" placeholder="نام محصول…"
+                       value="{{ search_value }}" class="input" aria-label="جستجوی محصول">
+            </div>
+
+            <div class="filter-group">
+                <h3>دسته‌بندی</h3>
+                <ul class="filter-list">
+                    <li><a href="/products"{% if active_cat.is_empty() %} class="active"{% endif %}>همه</a></li>
+                    {% for c in parent_categories %}
+                    <li>
+                        <a href="/products?cat={{ c.slug }}" class="filter-parent{% if active_cat == c.slug %} active{% endif %}">{{ c.name }}</a>
+                        {% if !c.children.is_empty() %}
+                        <ul>
+                        {% for sub in c.children %}
+                            <li><a href="/products?cat={{ sub.slug }}"{% if active_cat == sub.slug %} class="active"{% endif %}>{{ sub.name }}</a></li>
+                        {% endfor %}
+                        </ul>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <div class="filter-group">
+                <h3>برند</h3>
+                <select name="brand" class="input" aria-label="برند" onchange="this.form.submit()">
+                    <option value="">همه برندها</option>
+                    {% for b in brands %}
+                    <option value="{{ b.slug }}"{% if active_brand == b.slug %} selected{% endif %}>{{ b.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="filter-group">
+                <h3>محدوده‌ی قیمت (تومان)</h3>
+                <div class="price-range">
+                    <input type="number" name="min" placeholder="از" value="{{ min_value }}" class="input" min="0">
+                    <input type="number" name="max" placeholder="تا" value="{{ max_value }}" class="input" min="0">
+                </div>
+            </div>
+
+            <div class="filter-group">
+                <h3>فیلترهای سریع</h3>
+                <label class="check-inline"><input type="checkbox" name="stock" value="1"{% if stock_on %} checked{% endif %}> فقط کالاهای موجود</label>
+                <label class="check-inline"><input type="checkbox" name="off" value="1"{% if off_on %} checked{% endif %}> فقط تخفیف‌دار</label>
+            </div>
+
+            <div class="filter-group">
+                <h3>حداقل امتیاز</h3>
+                <select name="rating" class="input">
+                    <option value=""{% if rating_val == 0 %} selected{% endif %}>همه</option>
+                    <option value="4"{% if rating_val == 4 %} selected{% endif %}>۴ ستاره و بالاتر</option>
+                    <option value="3"{% if rating_val == 3 %} selected{% endif %}>۳ ستاره و بالاتر</option>
+                </select>
+            </div>
+
+            {% for g in attr_groups %}
+            <div class="filter-group">
+                <h3>{{ g.name }}</h3>
+                <ul class="filter-checks">
+                    {% for v in g.values %}
+                    <li>
+                        <label class="check-inline">
+                            <input type="checkbox" name="attr.{{ g.slug }}" value="{{ v.value }}"{% if v.selected %} checked{% endif %}>
+                            {{ v.value }}
+                        </label>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn btn-primary btn-block">اعمال فیلتر</button>
+            <a href="/products" class="btn btn-ghost btn-block">حذف فیلترها</a>
+        </form>
+    </aside>
+
+    <section class="catalog-main">
+        {% if !active_chips.is_empty() %}
+        <div class="active-filters">
+            {% for c in active_chips %}
+            <a href="{{ c.remove_url }}" class="filter-chip-active">{{ c.label }} <span class="x" aria-hidden="true">×</span></a>
+            {% endfor %}
+            <a href="/products" class="filter-chip-active">حذف همه</a>
+        </div>
+        {% endif %}
+
+        <div class="catalog-header">
+            <div>
+                <h1>{{ result_label }}</h1>
+                <p class="muted">{{ total_fa }} محصول یافت شد</p>
+            </div>
+            <div class="sort-bar">
+                <button type="button" class="mobile-filter-btn" aria-label="فیلترها"
+                        onclick="document.getElementById('filterPanel').classList.add('is-open');document.getElementById('filterBackdrop').classList.add('is-open')">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg>
+                    فیلترها
+                </button>
+                <label for="sort">مرتب‌سازی:</label>
+                <select id="sort" class="input" onchange="location.href=this.value">
+                    <option value="{{ sort_base }}sort=newest"{% if active_sort == "newest" %} selected{% endif %}>جدیدترین</option>
+                    <option value="{{ sort_base }}sort=bestselling"{% if active_sort == "bestselling" %} selected{% endif %}>پرفروش‌ترین</option>
+                    <option value="{{ sort_base }}sort=price_asc"{% if active_sort == "price_asc" %} selected{% endif %}>ارزان‌ترین</option>
+                    <option value="{{ sort_base }}sort=price_desc"{% if active_sort == "price_desc" %} selected{% endif %}>گران‌ترین</option>
+                    <option value="{{ sort_base }}sort=discount"{% if active_sort == "discount" %} selected{% endif %}>بیشترین تخفیف</option>
+                    <option value="{{ sort_base }}sort=featured"{% if active_sort == "featured" %} selected{% endif %}>ویژه</option>
+                </select>
+                <div class="view-toggle" data-view-toggle>
+                    <button type="button" data-view-mode="grid" class="view-btn is-active" aria-label="نمای شبکه‌ای">▦</button>
+                    <button type="button" data-view-mode="list" class="view-btn" aria-label="نمای فهرستی">≣</button>
+                </div>
+            </div>
+        </div>
+
+        {% if products.is_empty() %}
+        <div class="empty-state">
+            <h3>محصولی یافت نشد</h3>
+            <p class="muted">فیلترها را تغییر دهید یا عبارت دیگری جستجو کنید.</p>
+            <a href="/products" class="btn btn-outline">مشاهده‌ی همه‌ی محصولات</a>
+        </div>
+        {% else %}
+        <div class="product-grid" data-view>
+            {% for p in products %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+
+        {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="صفحه‌بندی">
+            {% if has_prev %}<a href="{{ prev_url }}" class="page-num" aria-label="قبلی">«</a>{% endif %}
+            {% for pl in page_links %}
+            <a href="{{ pl.url }}" class="page-num{% if pl.current %} active{% endif %}"{% if pl.current %} aria-current="page"{% endif %}>{{ pl.num_fa }}</a>
+            {% endfor %}
+            {% if has_next %}<a href="{{ next_url }}" class="page-num" aria-label="بعدی">»</a>{% endif %}
+        </nav>
+        {% endif %}
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

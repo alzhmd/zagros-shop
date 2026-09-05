@@ -1,0 +1,210 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}ویرایش محصول{% else %}محصول جدید{% endif %} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>{% if is_edit %}ویرایش محصول{% else %}افزودن محصول{% endif %}</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+
+  {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+
+  {% if !is_edit %}
+  <div class="alert alert-info">
+    ابتدا اطلاعات پایه را پر کنید و «ساخت محصول» را بزنید؛ بلافاصله به صفحه‌ی ویرایش می‌روید تا
+    <strong>تصاویر</strong>، <strong>تنوع‌ها (قیمت و موجودی)</strong> و <strong>مشخصات فنی</strong> را اضافه کنید.
+    برای فروش، هر محصول حداقل به یک تنوع نیاز دارد.
+  </div>
+  {% endif %}
+
+  <form method="post" action="{% if is_edit %}/admin/products/{{ id }}{% else %}/admin/products{% endif %}" class="repair-form">
+    <div class="form-section">
+      <h3>اطلاعات اصلی</h3>
+      <div class="form-grid">
+        <div class="form-field form-field-full">
+          <label for="name">نام محصول</label>
+          <input type="text" id="name" name="name" class="input" value="{{ name }}" required>
+        </div>
+        <div class="form-field">
+          <label for="slug">نامک (slug انگلیسی، در URL)</label>
+          <input type="text" id="slug" name="slug" class="input mono" value="{{ slug }}" dir="ltr"
+                 placeholder="emersun-tf-23" required>
+          <small class="muted">فقط حروف کوچک انگلیسی، رقم و خط تیره.</small>
+        </div>
+        <div class="form-field">
+          <label for="price_toman">قیمت پایه (تومان)</label>
+          <input type="text" id="price_toman" name="price_toman" class="input" value="{{ price_toman }}"
+                 inputmode="numeric" placeholder="۱۴۲۰۰۰۰۰">
+        </div>
+        <div class="form-field">
+          <label for="category_id">دسته‌بندی</label>
+          <select id="category_id" name="category_id" class="input">
+            <option value="">— بدون دسته —</option>
+            {% for c in categories %}
+            <option value="{{ c.id }}"{% if category_id == c.id.to_string() %} selected{% endif %}>{{ c.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-field">
+          <label for="brand_id">برند</label>
+          <select id="brand_id" name="brand_id" class="input">
+            <option value="">— بدون برند —</option>
+            {% for b in brands %}
+            <option value="{{ b.id }}"{% if brand_id == b.id.to_string() %} selected{% endif %}>{{ b.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-field form-field-full">
+          <label for="short_desc">توضیح کوتاه</label>
+          <input type="text" id="short_desc" name="short_desc" class="input" value="{{ short_desc }}">
+        </div>
+        <div class="form-field form-field-full">
+          <label for="description">توضیحات کامل</label>
+          <textarea id="description" name="description" class="input" rows="5">{{ description }}</textarea>
+        </div>
+        <div class="form-field form-field-full">
+          <label for="video_url">لینک ویدئو (یوتیوب/آپارات — اختیاری)</label>
+          <input type="url" id="video_url" name="video_url" class="input mono" value="{{ video_url }}" dir="ltr" placeholder="https://...">
+        </div>
+      </div>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="deal_ends">پایان پیشنهاد لحظه‌ای (اختیاری)</label>
+          <input type="datetime-local" id="deal_ends" name="deal_ends" class="input" value="{{ deal_ends }}">
+          <small class="muted">اگر تنظیم شود، تایمر شمارش معکوس روی صفحه‌ی محصول نمایش داده می‌شود.</small>
+        </div>
+      </div>
+      <div class="form-checks">
+        <label class="check-inline"><input type="checkbox" name="is_active" value="on"{% if is_active %} checked{% endif %}> فعال (نمایش در فروشگاه)</label>
+        <label class="check-inline"><input type="checkbox" name="is_featured" value="on"{% if is_featured %} checked{% endif %}> محصول منتخب (صفحه‌ی اصلی)</label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-accent btn-lg">{% if is_edit %}ذخیره‌ی تغییرات{% else %}ساخت محصول{% endif %}</button>
+      <a href="/admin/products" class="btn btn-ghost">انصراف</a>
+    </div>
+  </form>
+
+  {% if is_edit %}
+  <!-- ===================== تنوع‌ها ===================== -->
+  <div class="form-section admin-subsection">
+    <h3>تنوع‌ها (مدل/رنگ با قیمت و موجودی)</h3>
+    {% if variants.is_empty() %}
+    <p class="muted">هنوز تنوعی اضافه نشده. هر محصول برای فروش حداقل به یک تنوع نیاز دارد.</p>
+    {% else %}
+    <div class="variant-list">
+      <div class="variant-row variant-head">
+        <span>عنوان</span><span>SKU</span><span>قیمت (تومان)</span><span>قیمت قبل</span><span>موجودی</span><span>ترتیب</span><span>فعال</span><span></span>
+      </div>
+      {% for v in variants %}
+      <form method="post" action="/admin/products/{{ id }}/variants/{{ v.id }}" class="variant-row">
+        <input type="text" name="title" class="input input-sm" value="{{ v.title }}" required>
+        <input type="text" name="sku" class="input input-sm mono" value="{% if let Some(sk) = v.sku %}{{ sk }}{% endif %}" dir="ltr">
+        <input type="text" name="price_toman" class="input input-sm" value="{{ v.price / 10 }}" inputmode="numeric" required>
+        <input type="text" name="compare_toman" class="input input-sm" value="{% if let Some(c) = v.compare_at_price %}{{ c / 10 }}{% endif %}" inputmode="numeric" placeholder="بدون تخفیف">
+        <input type="text" name="stock" class="input input-sm" value="{{ v.stock }}" inputmode="numeric">
+        <input type="text" name="sort_order" class="input input-sm" value="{{ v.sort_order }}" inputmode="numeric">
+        <input type="checkbox" name="is_active" value="on"{% if v.is_active %} checked{% endif %} aria-label="فعال">
+        <span class="row-actions">
+          <button type="submit" class="btn btn-ghost btn-sm">ذخیره</button>
+          <button type="submit" formaction="/admin/products/{{ id }}/variants/{{ v.id }}/delete"
+                  class="btn btn-ghost btn-sm btn-danger"
+                  formnovalidate
+                  onclick="return confirm('حذف این تنوع؟')">حذف</button>
+        </span>
+      </form>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <form method="post" action="/admin/products/{{ id }}/variants" class="variant-add-row">
+      <input type="text" name="title" class="input" placeholder="عنوان تنوع (مثلاً: سفید)" required>
+      <input type="text" name="sku" class="input mono" placeholder="SKU" dir="ltr">
+      <input type="text" name="price_toman" class="input" placeholder="قیمت (تومان)" inputmode="numeric" required>
+      <input type="text" name="compare_toman" class="input" placeholder="قیمت قبل (اختیاری)" inputmode="numeric">
+      <input type="text" name="stock" class="input" placeholder="موجودی" inputmode="numeric">
+      <input type="hidden" name="is_active" value="on">
+      <button type="submit" class="btn btn-primary">افزودن تنوع</button>
+    </form>
+  </div>
+
+  <!-- ===================== تصاویر ===================== -->
+  <div class="form-section admin-subsection">
+    <h3>تصاویر</h3>
+    <p class="muted">تصویر را مستقیماً آپلود کنید (JPG/PNG/WebP تا ۶ مگابایت) یا مسیر/آدرس وارد کنید.</p>
+    {% if !images.is_empty() %}
+    <div class="admin-image-grid">
+      {% for img in images %}
+      <div class="admin-image-item{% if img.is_primary %} is-primary{% endif %}">
+        <img src="{{ img.path }}" alt="{% if let Some(a) = img.alt %}{{ a }}{% endif %}" loading="lazy">
+        <div class="admin-image-actions">
+          {% if img.is_primary %}<span class="badge badge-featured">اصلی</span>
+          {% else %}
+          <form method="post" action="/admin/products/{{ id }}/images/{{ img.id }}/primary" class="inline-form">
+            <button type="submit" class="btn btn-ghost">تصویر اصلی</button>
+          </form>
+          {% endif %}
+          <form method="post" action="/admin/products/{{ id }}/images/{{ img.id }}/delete" class="inline-form">
+            <button type="submit" class="btn btn-ghost btn-danger">حذف</button>
+          </form>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="/admin/products/{{ id }}/images" enctype="multipart/form-data" class="image-upload-form">
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="imgfile">آپلود فایل تصویر</label>
+          <input type="file" id="imgfile" name="file" accept="image/*" class="input">
+        </div>
+        <div class="form-field">
+          <label for="imgpath">یا مسیر/آدرس تصویر</label>
+          <input type="text" id="imgpath" name="path" class="input mono" placeholder="/assets/img/... یا https://" dir="ltr">
+        </div>
+        <div class="form-field">
+          <label for="imgalt">متن جایگزین (alt)</label>
+          <input type="text" id="imgalt" name="alt" class="input">
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">افزودن تصویر</button>
+    </form>
+  </div>
+
+  <!-- ===================== مشخصات فنی ===================== -->
+  <div class="form-section admin-subsection">
+    <h3>مشخصات فنی (ویژگی‌ها)</h3>
+    <p class="muted">برای فیلتر پویا و نمایش جدول مشخصات در صفحه‌ی محصول استفاده می‌شود.</p>
+    {% if all_attrs.is_empty() %}
+    <p class="muted">هنوز هیچ ویژگی‌ای تعریف نشده است.</p>
+    {% else %}
+    <div class="attr-grid">
+      {% for attr in all_attrs %}
+      <form method="post" action="/admin/products/{{ id }}/attrs" class="attr-row">
+        <input type="hidden" name="attribute_id" value="{{ attr.id }}">
+        <label class="attr-label">{{ attr.name }}</label>
+        <input type="text" name="value" class="input input-sm"
+               value="{% for a in attrs %}{% if a.attribute_id == attr.id %}{{ a.value }}{% endif %}{% endfor %}"
+               placeholder="مقدار (خالی = حذف)">
+        <button type="submit" class="btn btn-ghost btn-sm">ذخیره</button>
+      </form>
+      {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="/admin/products/{{ id }}/attrs/new" class="variant-add-row" style="margin-top:1rem">
+      <input type="text" name="name" class="input" placeholder="نام ویژگی جدید (مثلاً: گارانتی)">
+      <button type="submit" class="btn btn-outline">ساخت ویژگی</button>
+    </form>
+  </div>
+
+  <div class="form-section admin-subsection danger-zone">
+    <h3>حذف محصول</h3>
+    <p class="muted">این محصول و همه‌ی تنوع‌ها و تصاویرش برای همیشه حذف می‌شوند. تاریخچه‌ی سفارش‌ها حفظ می‌شود.</p>
+    <form method="post" action="/admin/products/{{ id }}/delete" onsubmit="return confirm('از حذف کامل این محصول مطمئن هستید؟')">
+      <button type="submit" class="btn btn-danger">حذف کامل محصول</button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}تعمیر #{{ ticket_fa }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>درخواست #{{ ticket_fa }}</h1>
+      {% include "admin/_nav.html" %}
+  </div>
+  <div class="admin-detail-grid">
+    <div class="detail-panel">
+      <h3>اطلاعات درخواست</h3>
+      <div class="info-row"><span class="muted">مشتری</span><span>{{ repair.full_name }} — {{ repair.phone }}</span></div>
+      <div class="info-row"><span class="muted">دستگاه</span><span>{{ repair.device_type }}{% if let Some(b) = repair.brand %} / {{ b }}{% endif %}</span></div>
+      <div class="info-row"><span class="muted">روش</span><span>{{ repair.method_fa() }}</span></div>
+      {% if let Some(a) = repair.address %}<div class="info-row"><span class="muted">نشانی</span><span>{{ a }}</span></div>{% endif %}
+      <div class="info-row"><span class="muted">مشکل</span><span>{{ repair.problem }}</span></div>
+      <div class="info-row"><span class="muted">وضعیت</span><span class="order-status status-{{ repair.status }}">{{ repair.status_fa() }}</span></div>
+
+      <h3 style="margin-top:1.5rem">جزئیات فنی</h3>
+      <form method="post" action="/admin/repairs/{{ repair.id }}/details" class="auth-form">
+        <label for="technician_id">تکنسین مسئول</label>
+        <select id="technician_id" name="technician_id" class="input">
+          <option value="">— تعیین‌نشده —</option>
+          {% for t in technicians %}
+          <option value="{{ t.id }}"{% if technician_id == t.id.to_string() %} selected{% endif %}>{{ t.label }}</option>
+          {% endfor %}
+        </select>
+        <label for="cost_estimate_toman">برآورد هزینه (تومان)</label>
+        <input type="text" id="cost_estimate_toman" name="cost_estimate_toman" class="input" inputmode="numeric" value="{{ cost_estimate_toman }}">
+        <label for="final_cost_toman">هزینه‌ی نهایی (تومان)</label>
+        <input type="text" id="final_cost_toman" name="final_cost_toman" class="input" inputmode="numeric" value="{{ final_cost_toman }}">
+        <label for="admin_note">یادداشت داخلی</label>
+        <input type="text" id="admin_note" name="admin_note" class="input" value="{% if let Some(n) = repair.admin_note %}{{ n }}{% endif %}">
+        <button type="submit" class="btn btn-primary btn-block">ذخیره‌ی جزئیات</button>
+      </form>
+    </div>
+    <div class="detail-panel">
+      <h3>تغییر وضعیت</h3>
+      <form method="post" action="/admin/repairs/{{ repair.id }}" class="auth-form">
+        <label for="status">وضعیت جدید</label>
+        <select id="status" name="status" class="input">
+          {% for st in statuses %}
+          <option value="{{ st.key }}"{% if repair.status == st.key %} selected{% endif %}>{{ st.label }}</option>
+          {% endfor %}
+        </select>
+        <label for="note">یادداشت (اختیاری)</label>
+        <input type="text" id="note" name="note" class="input">
+        <button type="submit" class="btn btn-primary btn-block">ثبت تغییر</button>
+      </form>
+      <h3 style="margin-top:1.5rem">تاریخچه</h3>
+      <ol class="timeline">
+        {% for h in history %}
+        <li class="timeline-item">
+          <span class="timeline-dot" aria-hidden="true"></span>
+          <div class="timeline-body"><strong>{{ h.status_fa() }}</strong>{% if let Some(n) = h.note %}<p class="muted">{{ n }}</p>{% endif %}</div>
+        </li>
+        {% endfor %}
+      </ol>
+    </div>
+  </div>
+</div>
+{% endblock %}

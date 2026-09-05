@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}گفت‌وگوها — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>گفت‌وگوها</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+
+  <div class="filter-bar">
+    <a href="/admin/chat?status=active" class="filter-chip{% if active_filter == "active" %} active{% endif %}">فعال</a>
+    <a href="/admin/chat?status=closed" class="filter-chip{% if active_filter == "closed" %} active{% endif %}">بسته‌شده</a>
+    <a href="/admin/chat?status=all" class="filter-chip{% if active_filter == "all" %} active{% endif %}">همه</a>
+  </div>
+
+  {% if sessions.is_empty() %}
+  <div class="empty-state">
+    <h3>گفت‌وگویی یافت نشد</h3>
+    <p class="muted">وقتی مشتری گفت‌وگوی زنده را آغاز کند، اینجا نمایش داده می‌شود.</p>
+  </div>
+  {% else %}
+  <div class="chat-session-list">
+    {% for sess in sessions %}
+    <div class="chat-session-row">
+      <a href="/admin/chat/{{ sess.id }}" class="chat-session-name">{{ sess.display_name() }}</a>
+      <span class="muted">{{ sess.message_count }} پیام</span>
+      {% if sess.is_active() %}
+      <span class="order-status status-active">فعال</span>
+      <form method="post" action="/admin/chat/{{ sess.id }}/close" class="inline-form">
+        <button type="submit" class="btn btn-ghost btn-sm">بستن</button>
+      </form>
+      {% else %}
+      <span class="order-status status-closed">بسته‌شده</span>
+      <a href="/admin/chat/{{ sess.id }}" class="btn btn-ghost btn-sm">مشاهده</a>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

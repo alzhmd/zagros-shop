@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}ورود / ثبت‌نام — {{ site_name }}{% endblock %}
+
+{% block content %}
+<div class="container auth-wrap">
+    <div class="auth-card">
+        <h1>ورود به حساب</h1>
+        <p class="muted">شماره موبایل خود را وارد کنید تا کد ورود برایتان ارسال شود.</p>
+        {% if let Some(e) = error %}<div class="alert alert-error">{{ e }}</div>{% endif %}
+        <form method="post" action="/account/login" class="auth-form">
+            <label for="mobile">شماره موبایل</label>
+            <input type="tel" id="mobile" name="mobile" class="input" placeholder="۰۹۱۲۳۴۵۶۷۸۹"
+                   inputmode="numeric" autocomplete="tel" required autofocus>
+            <button type="submit" class="btn btn-primary btn-block btn-lg">دریافت کد ورود</button>
+        </form>
+        <p class="auth-note muted">با ورود، <a href="/terms">قوانین</a> را می‌پذیرید.</p>
+    </div>
+</div>
+{% endblock %}

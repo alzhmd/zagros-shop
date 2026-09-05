@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}پیشنهادهای ویژه — {{ site_name }}{% endblock %}
+{% block description %}پیشنهادهای ویژه، پرفروش‌ترین و جدیدترین محصولات فروشگاه زاگرس.{% endblock %}
+{% block canonical %}<link rel="canonical" href="{{ canonical }}">{% endblock %}
+
+{% block content %}
+<div class="container section">
+    <div class="content-hero">
+        <span class="section-eyebrow">فروش ویژه</span>
+        <h1>پیشنهادهای زاگرس</h1>
+        <p class="lead">منتخب کارشناسان ما؛ بهترین‌ها را از دست ندهید.</p>
+    </div>
+
+    {% if !featured.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>پیشنهادهای ویژه</h2></div></div>
+        <div class="product-grid">
+            {% for p in featured %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if !popular.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>پرفروش‌ترین‌ها</h2></div></div>
+        <div class="product-grid">
+            {% for p in popular %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if !newest.is_empty() %}
+    <section class="section">
+        <div class="section-head"><div><h2>جدیدترین‌ها</h2></div></div>
+        <div class="product-grid">
+            {% for p in newest %}
+            {% include "partials/product_card.html" %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}کاربر {{ user.mobile }} — {{ site_name }}{% endblock %}
+{% block content %}
+<div class="container section">
+  <div class="admin-head">
+    <h1>کاربر {{ user.mobile }}</h1>
+    {% include "admin/_nav.html" %}
+  </div>
+  <p><a href="/admin/users" class="muted">→ بازگشت به فهرست کاربران</a></p>
+
+  <div class="admin-detail-grid">
+    <!-- ستون راست: اطلاعات + کنترل‌ها -->
+    <div class="detail-panel">
+      <h3>اطلاعات کاربر</h3>
+      <div class="info-row"><span class="muted">موبایل</span><span class="mono">{{ user.mobile }}</span></div>
+      <div class="info-row"><span class="muted">نام</span><span>{% if let Some(n) = user.full_name %}{{ n }}{% else %}—{% endif %}</span></div>
+      <div class="info-row"><span class="muted">ایمیل</span><span>{% if let Some(e) = user.email %}{{ e }}{% else %}—{% endif %}</span></div>
+      <div class="info-row"><span class="muted">امتیاز باشگاه</span><span>{{ points_fa }}</span></div>
+      <div class="info-row"><span class="muted">کیف پول</span><span>{{ wallet_fa }}</span></div>
+      <div class="info-row"><span class="muted">سفارش‌ها</span><span>{{ order_count }}</span></div>
+      <div class="info-row"><span class="muted">تعمیرات</span><span>{{ repair_count }}</span></div>
+      <div class="info-row"><span class="muted">تلگرام</span><span>{% if user.telegram_id.is_some() %}متصل{% else %}متصل نیست{% endif %}</span></div>
+      <div class="info-row"><span class="muted">عضویت</span><span class="mono">{{ joined_fa }}</span></div>
+      <div class="info-row"><span class="muted">وضعیت</span><span>{% if user.is_active %}<span class="order-status status-active">فعال</span>{% else %}<span class="order-status status-cancelled">مسدود</span>{% endif %}</span></div>
+
+      {% if user.role != "admin" %}
+      <form method="post" action="/admin/users/{{ user.id }}/active" style="margin-top:1rem">
+        <input type="hidden" name="value" value="{% if user.is_active %}0{% else %}1{% endif %}">
+        <button type="submit" class="btn {% if user.is_active %}btn-danger{% else %}btn-primary{% endif %} btn-block">
+          {% if user.is_active %}مسدودکردن کاربر{% else %}فعال‌کردن کاربر{% endif %}
+        </button>
+      </form>
+      {% else %}
+      <p class="muted" style="margin-top:1rem">حساب مدیر قابل‌مسدودشدن نیست.</p>
+      {% endif %}
+
+      <h3 style="margin-top:1.5rem">نقش</h3>
+      <form method="post" action="/admin/users/{{ user.id }}/role" class="auth-form">
+        <select name="role" class="input">
+          {% for r in roles %}
+          <option value="{{ r.key }}"{% if user.role == r.key %} selected{% endif %}>{{ r.label }}</option>
+          {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-ghost btn-block">ثبت نقش</button>
+      </form>
+
+      <h3 style="margin-top:1.5rem">تنظیم دستی امتیاز</h3>
+      <form method="post" action="/admin/users/{{ user.id }}/points" class="auth-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="amount">مقدار</label>
+            <input type="text" id="amount" name="amount" class="input" inputmode="numeric" placeholder="مثلاً ۱۰۰" required>
+          </div>
+          <div class="form-field">
+            <label for="direction">نوع</label>
+            <select id="direction" name="direction" class="input">
+              <option value="add">افزودن</option>
+              <option value="deduct">کسر</option>
+            </select>
+          </div>
+        </div>
+        <input type="text" name="note" class="input" placeholder="توضیح (اختیاری)">
+        <button type="submit" class="btn btn-accent btn-block">ثبت امتیاز</button>
+      </form>
+
+      <h3 style="margin-top:1.5rem">تنظیم دستی کیف پول</h3>
+      <form method="post" action="/admin/users/{{ user.id }}/wallet" class="auth-form">
+        <div class="form-grid">
+          <div class="form-field">
+            <label for="wamount">مبلغ (تومان)</label>
+            <input type="text" id="wamount" name="amount_toman" class="input" inputmode="numeric" placeholder="مثلاً ۵۰۰۰۰" required>
+          </div>
+          <div class="form-field">
+            <label for="wdirection">نوع</label>
+            <select id="wdirection" name="direction" class="input">
+              <option value="add">واریز</option>
+              <option value="deduct">برداشت</option>
+            </select>
+          </div>
+        </div>
+        <input type="text" name="note" class="input" placeholder="توضیح (اختیاری)">
+        <button type="submit" class="btn btn-accent btn-block">ثبت تراکنش کیف پول</button>
+      </form>
+    </div>
+
+    <!-- ستون چپ: تاریخچه‌ها -->
+    <div class="detail-panel">
+      <h3>تراکنش‌های امتیاز اخیر</h3>
+      {% if loyalty.is_empty() %}
+      <p class="muted">تراکنشی نیست.</p>
+      {% else %}
+      <table class="admin-table">
+        <thead><tr><th>تغییر</th><th>بابت</th><th>توضیح</th></tr></thead>
+        <tbody>
+          {% for tx in loyalty %}
+          <tr>
+            <td class="{% if tx.is_earn() %}points-earn{% else %}points-spend{% endif %}">{{ tx.delta_signed() }}</td>
+            <td>{{ tx.reason_fa() }}</td>
+            <td class="muted">{% if let Some(n) = tx.note %}{{ n }}{% else %}—{% endif %}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+
+      <h3 style="margin-top:1.5rem">سفارش‌ها</h3>
+      {% if orders.is_empty() %}
+      <p class="muted">سفارشی ندارد.</p>
+      {% else %}
+      <div class="mini-list">
+        {% for o in orders %}
+        <a href="/admin/orders/{{ o.id }}" class="mini-row">
+          <span>سفارش #{{ o.order_number }}</span>
+          <span class="order-status status-{{ o.status }}">{{ o.status_fa() }}</span>
+          <span>{{ o.total_fa() }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <h3 style="margin-top:1.5rem">درخواست‌های تعمیر</h3>
+      {% if repairs.is_empty() %}
+      <p class="muted">درخواستی ندارد.</p>
+      {% else %}
+      <div class="mini-list">
+        {% for r in repairs %}
+        <a href="/admin/repairs/{{ r.id }}" class="mini-row">
+          <span>#{{ r.ticket_number }} — {{ r.device_type }}</span>
+          <span class="order-status status-{{ r.status }}">{{ r.status_fa() }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
