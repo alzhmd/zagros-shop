@@ -38,7 +38,7 @@ askama = "0.12"
 # --- Sessions / auth ---
 tower-sessions = "0.13"
 tower-sessions-sqlx-store = { version = "0.14", features = ["postgres"] }
-argon2 = "0.5"
+argon2 = "0.6"
 password-hash = "0.5"
 
 # --- Background jobs (Postgres-backed) ---
