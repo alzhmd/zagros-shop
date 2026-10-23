@@ -99,7 +99,7 @@ impl Default for PaymentConfig {
         Self {
             provider: "zibal".into(),
             merchant: "zibal".into(), // مرچنت تستی زیبال
-            enabled: false,            // تا قبل از خرید درگاه، آنلاین غیرفعال
+            enabled: false,           // تا قبل از خرید درگاه، آنلاین غیرفعال
         }
     }
 }

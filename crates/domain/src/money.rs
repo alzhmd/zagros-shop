@@ -78,7 +78,10 @@ mod tests {
 
     #[test]
     fn format_fa() {
-        assert_eq!(Rial::from_toman(1_250_000).format_toman_fa(), "۱٬۲۵۰٬۰۰۰ تومان");
+        assert_eq!(
+            Rial::from_toman(1_250_000).format_toman_fa(),
+            "۱٬۲۵۰٬۰۰۰ تومان"
+        );
         assert_eq!(Rial::from_toman(0).format_toman_fa(), "۰ تومان");
     }
 }

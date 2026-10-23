@@ -24,8 +24,14 @@ pub struct StatusQuery {
 }
 
 const REPAIR_STATUSES: [&str; 8] = [
-    "submitted", "reviewing", "scheduled", "in_progress",
-    "awaiting_parts", "ready", "completed", "cancelled",
+    "submitted",
+    "reviewing",
+    "scheduled",
+    "in_progress",
+    "awaiting_parts",
+    "ready",
+    "completed",
+    "cancelled",
 ];
 const TICKET_STATUSES: [&str; 3] = ["open", "answered", "closed"];
 
@@ -158,7 +164,9 @@ pub async fn repair_detail(
         .ok_or_else(|| domain::DomainError::NotFound("درخواست".into()))?;
     let history = db::repairs::status_history(&s.db, id).await?;
     let ticket_fa = crate::filters::to_fa_digits(&repair.ticket_number.to_string());
-    let technicians = db::repairs::list_technicians(&s.db).await.unwrap_or_default();
+    let technicians = db::repairs::list_technicians(&s.db)
+        .await
+        .unwrap_or_default();
     let statuses = REPAIR_STATUSES
         .iter()
         .map(|k| FilterOption {
@@ -166,9 +174,18 @@ pub async fn repair_detail(
             label: db::repairs::status_label(k),
         })
         .collect();
-    let cost_estimate_toman = repair.cost_estimate.map(|c| (c / 10).to_string()).unwrap_or_default();
-    let final_cost_toman = repair.final_cost.map(|c| (c / 10).to_string()).unwrap_or_default();
-    let technician_id = repair.technician_id.map(|t| t.to_string()).unwrap_or_default();
+    let cost_estimate_toman = repair
+        .cost_estimate
+        .map(|c| (c / 10).to_string())
+        .unwrap_or_default();
+    let final_cost_toman = repair
+        .final_cost
+        .map(|c| (c / 10).to_string())
+        .unwrap_or_default();
+    let technician_id = repair
+        .technician_id
+        .map(|t| t.to_string())
+        .unwrap_or_default();
     render(RepairDetailTemplate {
         site_name: s.site_name(),
         repair,
@@ -222,8 +239,20 @@ pub async fn update_repair_details(
     let cost_estimate = to_rial(&f.cost_estimate_toman);
     let final_cost = to_rial(&f.final_cost_toman);
     let technician_id = crate::routes::admin_util::parse_uuid_opt(&f.technician_id);
-    let admin_note = f.admin_note.as_deref().map(str::trim).filter(|s| !s.is_empty());
-    db::repairs::set_details(&s.db, id, cost_estimate, final_cost, technician_id, admin_note).await?;
+    let admin_note = f
+        .admin_note
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
+    db::repairs::set_details(
+        &s.db,
+        id,
+        cost_estimate,
+        final_cost,
+        technician_id,
+        admin_note,
+    )
+    .await?;
     Ok(Redirect::to(&format!("/admin/repairs/{}", id)).into_response())
 }
 
@@ -308,7 +337,11 @@ pub async fn ticket_reply(
                     ticket.ticket_number, ticket.subject, f.body.trim()
                 );
                 s.mailer
-                    .send(email, &format!("پاسخ تیکت #{}", ticket.ticket_number), &body)
+                    .send(
+                        email,
+                        &format!("پاسخ تیکت #{}", ticket.ticket_number),
+                        &body,
+                    )
                     .await;
             }
         }

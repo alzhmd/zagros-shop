@@ -146,7 +146,9 @@ impl SettingsCache {
             .unwrap_or_else(|| default.to_string())
     }
     pub fn get_i64(&self, key: &str, default: i64) -> i64 {
-        self.raw(key).and_then(|s| s.trim().parse().ok()).unwrap_or(default)
+        self.raw(key)
+            .and_then(|s| s.trim().parse().ok())
+            .unwrap_or(default)
     }
     pub fn get_bool(&self, key: &str, default: bool) -> bool {
         match self.raw(key).as_deref() {
@@ -207,7 +209,9 @@ impl SettingsCache {
         let mut out = Vec::new();
         for (key, def_label, def_toman) in keys {
             if self.get_bool(&format!("shipping.{key}.enabled"), key == "normal") {
-                let toman = self.get_i64(&format!("shipping.{key}.toman"), def_toman).max(0);
+                let toman = self
+                    .get_i64(&format!("shipping.{key}.toman"), def_toman)
+                    .max(0);
                 out.push(ShippingMethod {
                     key: key.to_string(),
                     label: self.get_or(&format!("shipping.{key}.label"), def_label),

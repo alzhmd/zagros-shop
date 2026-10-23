@@ -48,7 +48,9 @@ pub async fn request_form(
         return Ok(Redirect::to("/account/login").into_response());
     };
     let Some(order) = db::orders::find(&s.db, order_id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     if order.user_id != Some(user.id) {
         return Err(AppError::Domain(domain::DomainError::Unauthorized));
@@ -83,7 +85,9 @@ pub async fn submit(
         return Ok(Redirect::to("/account/login").into_response());
     };
     let Some(order) = db::orders::find(&s.db, order_id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     if order.user_id != Some(user.id) || !is_returnable(&order.status) {
         return Err(AppError::Domain(domain::DomainError::Unauthorized));
@@ -103,7 +107,10 @@ pub async fn submit(
     } else {
         "other".into()
     };
-    let description = map.get("description").map(|s| s.trim().to_string()).filter(|s| !s.is_empty());
+    let description = map
+        .get("description")
+        .map(|s| s.trim().to_string())
+        .filter(|s| !s.is_empty());
 
     let order_items = db::orders::items_with_id(&s.db, order.id).await?;
     let mut selected: Vec<db::returns::NewReturnItem> = Vec::new();
@@ -131,7 +138,15 @@ pub async fn submit(
         )));
     }
 
-    let ret = db::returns::create(&s.db, order.id, Some(user.id), &reason, description.as_deref(), &selected).await?;
+    let ret = db::returns::create(
+        &s.db,
+        order.id,
+        Some(user.id),
+        &reason,
+        description.as_deref(),
+        &selected,
+    )
+    .await?;
     Ok(Redirect::to(&format!("/return/{}", ret.return_number)).into_response())
 }
 
@@ -146,7 +161,10 @@ struct ReturnsTemplate {
     returns: Vec<db::returns::Return>,
 }
 
-pub async fn list(State(s): State<AppState>, CurrentUser(user): CurrentUser) -> AppResult<Response> {
+pub async fn list(
+    State(s): State<AppState>,
+    CurrentUser(user): CurrentUser,
+) -> AppResult<Response> {
     let Some(user) = user else {
         return Ok(Redirect::to("/account/login").into_response());
     };
@@ -181,7 +199,9 @@ pub async fn detail(
         return Ok(Redirect::to("/account/login").into_response());
     };
     let Some(ret) = db::returns::find_by_number(&s.db, number).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("مرجوعی".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "مرجوعی".into(),
+        )));
     };
     if ret.user_id != Some(user.id) {
         return Err(AppError::Domain(domain::DomainError::Unauthorized));

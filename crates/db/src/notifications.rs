@@ -66,7 +66,11 @@ pub async fn unread_count(db: &Db, user_id: Uuid) -> Result<i64, sqlx::Error> {
     .await
 }
 
-pub async fn list_for_user(db: &Db, user_id: Uuid, limit: i64) -> Result<Vec<Notification>, sqlx::Error> {
+pub async fn list_for_user(
+    db: &Db,
+    user_id: Uuid,
+    limit: i64,
+) -> Result<Vec<Notification>, sqlx::Error> {
     sqlx::query_as::<_, Notification>(
         "SELECT * FROM notifications WHERE user_id = $1 ORDER BY created_at DESC LIMIT $2",
     )
@@ -143,10 +147,12 @@ pub async fn notify_back_in_stock(
     .execute(db)
     .await?
     .rows_affected();
-    sqlx::query("UPDATE stock_alerts SET notified_at = now() WHERE variant_id = $1 AND notified_at IS NULL")
-        .bind(variant_id)
-        .execute(db)
-        .await?;
+    sqlx::query(
+        "UPDATE stock_alerts SET notified_at = now() WHERE variant_id = $1 AND notified_at IS NULL",
+    )
+    .bind(variant_id)
+    .execute(db)
+    .await?;
     Ok(n)
 }
 

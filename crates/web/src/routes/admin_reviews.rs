@@ -68,7 +68,8 @@ pub async fn set_status(
             if let Ok(Some((Some(uid), name, slug))) = db::reviews::notify_info(&s.db, id).await {
                 let title = format!("نظر شما برای «{name}» تأیید شد");
                 let url = format!("/product/{slug}");
-                let _ = db::notifications::create(&s.db, uid, "review", &title, None, Some(&url)).await;
+                let _ =
+                    db::notifications::create(&s.db, uid, "review", &title, None, Some(&url)).await;
             }
         }
     }

@@ -98,16 +98,28 @@ pub struct BannerForm {
 }
 
 fn parse(f: &BannerForm) -> BannerInput {
-    let opt = |o: &Option<String>| o.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty());
+    let opt = |o: &Option<String>| {
+        o.clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+    };
     BannerInput {
-        placement: if f.placement.trim().is_empty() { "hero".into() } else { f.placement.trim().to_string() },
+        placement: if f.placement.trim().is_empty() {
+            "hero".into()
+        } else {
+            f.placement.trim().to_string()
+        },
         title: opt(&f.title),
         subtitle: opt(&f.subtitle),
         image_path: opt(&f.image_path),
         link: opt(&f.link),
         cta_label: opt(&f.cta_label),
         bg_color: None,
-        sort_order: f.sort_order.as_deref().and_then(|v| parse_digits(v.trim()).ok()).unwrap_or(0) as i32,
+        sort_order: f
+            .sort_order
+            .as_deref()
+            .and_then(|v| parse_digits(v.trim()).ok())
+            .unwrap_or(0) as i32,
         is_active: crate::routes::admin_util::checkbox(&f.is_active),
     }
 }

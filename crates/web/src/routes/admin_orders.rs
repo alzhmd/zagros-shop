@@ -54,8 +54,9 @@ pub async fn list(
 ) -> AppResult<Html<String>> {
     let filter = q.status.filter(|s| ORDER_STATUSES.contains(&s.as_str()));
     let orders = orders_admin::list(&s.db, filter.as_deref()).await?;
-    let total_count =
-        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM orders").fetch_one(&s.db).await?;
+    let total_count = sqlx::query_scalar::<_, i64>("SELECT count(*) FROM orders")
+        .fetch_one(&s.db)
+        .await?;
     render(OrdersTemplate {
         site_name: s.site_name(),
         total_count,

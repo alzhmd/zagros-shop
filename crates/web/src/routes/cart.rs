@@ -51,7 +51,9 @@ struct CartBodyTemplate {
 /// پاسخ HTMX برای تغییر سبد: فقط بدنه‌ی سبد را برمی‌گرداند (به‌جای ریدایرکت).
 async fn cart_body_response(s: &AppState, cart_id: Uuid) -> AppResult<axum::response::Response> {
     let items = db::cart::items(&s.db, cart_id).await?;
-    let saved = db::cart::saved_items(&s.db, cart_id).await.unwrap_or_default();
+    let saved = db::cart::saved_items(&s.db, cart_id)
+        .await
+        .unwrap_or_default();
     let total: i64 = items.iter().map(|i| i.line_total()).sum();
     let body = CartBodyTemplate {
         is_empty: items.is_empty() && saved.is_empty(),
@@ -77,7 +79,9 @@ pub async fn view(
     let (jar, key) = ensure_cart_cookie(jar);
     let cart_id = db::cart::get_or_create_cart(&s.db, &key).await?;
     let items = db::cart::items(&s.db, cart_id).await?;
-    let saved = db::cart::saved_items(&s.db, cart_id).await.unwrap_or_default();
+    let saved = db::cart::saved_items(&s.db, cart_id)
+        .await
+        .unwrap_or_default();
     let total: i64 = items.iter().map(|i| i.line_total()).sum();
 
     // پیشنهاد مکمل (پرفروش‌ها) + بازدیدهای اخیر (از کوکی).
@@ -94,7 +98,9 @@ pub async fn view(
         .filter_map(|s| uuid::Uuid::parse_str(s.trim()).ok())
         .take(4)
         .collect();
-    let recent = db::catalog::cards_by_ids(&s.db, &recent_ids).await.unwrap_or_default();
+    let recent = db::catalog::cards_by_ids(&s.db, &recent_ids)
+        .await
+        .unwrap_or_default();
 
     let tpl = CartTemplate {
         site_name: s.site_name(),

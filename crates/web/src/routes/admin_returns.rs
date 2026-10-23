@@ -47,7 +47,9 @@ pub async fn list(
     _admin: AdminUser,
     Query(q): Query<StatusQuery>,
 ) -> AppResult<Html<String>> {
-    let filter = q.status.filter(|st| db::returns::RETURN_STATUSES.contains(&st.as_str()));
+    let filter = q
+        .status
+        .filter(|st| db::returns::RETURN_STATUSES.contains(&st.as_str()));
     let returns = db::returns::list_all(&s.db, filter.as_deref()).await?;
     render(ReturnsTemplate {
         site_name: s.site_name(),
@@ -80,7 +82,10 @@ pub async fn detail(
     let order = db::orders::find(&s.db, ret.order_id).await?;
     let items = db::returns::items(&s.db, ret.id).await?;
     let history = db::returns::history(&s.db, ret.id).await?;
-    let refund_toman = ret.refund_amount.map(|a| (a / 10).to_string()).unwrap_or_default();
+    let refund_toman = ret
+        .refund_amount
+        .map(|a| (a / 10).to_string())
+        .unwrap_or_default();
     render(ReturnDetailTemplate {
         site_name: s.site_name(),
         ret,
@@ -106,7 +111,9 @@ pub async fn update_status(
     Form(f): Form<UpdateForm>,
 ) -> AppResult<Response> {
     if !db::returns::RETURN_STATUSES.contains(&f.status.as_str()) {
-        return Err(AppError::Domain(domain::DomainError::Invalid("وضعیت نامعتبر".into())));
+        return Err(AppError::Domain(domain::DomainError::Invalid(
+            "وضعیت نامعتبر".into(),
+        )));
     }
     let refund = f
         .refund_toman
@@ -124,9 +131,27 @@ pub async fn update_status(
             if let (Some(uid), Some(amount)) = (ret.user_id, ret.refund_amount.filter(|a| *a > 0)) {
                 let num = crate::filters::to_fa_digits(&ret.return_number.to_string());
                 let rnote = format!("بازپرداخت مرجوعی #{num}");
-                if db::wallet::add_transaction(&s.db, uid, amount, "return_refund", Some(ret.order_id), Some(&rnote)).await.is_ok() {
+                if db::wallet::add_transaction(
+                    &s.db,
+                    uid,
+                    amount,
+                    "return_refund",
+                    Some(ret.order_id),
+                    Some(&rnote),
+                )
+                .await
+                .is_ok()
+                {
                     let title = format!("بازپرداخت مرجوعی #{num} به کیف پول شما واریز شد");
-                    let _ = db::notifications::create(&s.db, uid, "order", &title, None, Some("/account/wallet")).await;
+                    let _ = db::notifications::create(
+                        &s.db,
+                        uid,
+                        "order",
+                        &title,
+                        None,
+                        Some("/account/wallet"),
+                    )
+                    .await;
                 }
             }
         }

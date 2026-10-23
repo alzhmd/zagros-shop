@@ -133,7 +133,10 @@ async fn build_edit_template(
         id: product.id.to_string(),
         name: product.name,
         slug: product.slug,
-        category_id: product.category_id.map(|x| x.to_string()).unwrap_or_default(),
+        category_id: product
+            .category_id
+            .map(|x| x.to_string())
+            .unwrap_or_default(),
         brand_id: product.brand_id.map(|x| x.to_string()).unwrap_or_default(),
         short_desc: product.short_desc.unwrap_or_default(),
         description: product.description.unwrap_or_default(),
@@ -144,7 +147,11 @@ async fn build_edit_template(
         // datetime-local نیازمند فرمت «YYYY-MM-DDTHH:MM» به وقت ایران است (UTC + ۳:۳۰).
         deal_ends: product
             .deal_ends_at
-            .map(|t| (t + chrono::Duration::minutes(IRAN_OFFSET_MIN)).format("%Y-%m-%dT%H:%M").to_string())
+            .map(|t| {
+                (t + chrono::Duration::minutes(IRAN_OFFSET_MIN))
+                    .format("%Y-%m-%dT%H:%M")
+                    .to_string()
+            })
             .unwrap_or_default(),
         categories,
         brands,
@@ -201,12 +208,24 @@ fn parse_product_form(f: &ProductForm) -> Result<ProductInput, String> {
         slug,
         category_id: parse_uuid_opt(&f.category_id),
         brand_id: parse_uuid_opt(&f.brand_id),
-        short_desc: f.short_desc.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
-        description: f.description.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        short_desc: f
+            .short_desc
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
+        description: f
+            .description
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
         base_price: domain::Rial::from_toman(toman).0,
         is_active: checkbox(&f.is_active),
         is_featured: checkbox(&f.is_featured),
-        video_url: f.video_url.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        video_url: f
+            .video_url
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
         deal_ends_at: parse_deal_ends(f.deal_ends.as_deref()),
     })
 }
@@ -247,11 +266,15 @@ pub async fn update(
     Form(f): Form<ProductForm>,
 ) -> AppResult<Response> {
     let Some(product) = cadmin::find_product(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("محصول".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "محصول".into(),
+        )));
     };
     let input = match parse_product_form(&f) {
         Ok(i) => i,
-        Err(msg) => return Ok(render(build_edit_template(&s, product, Some(msg)).await?)?.into_response()),
+        Err(msg) => {
+            return Ok(render(build_edit_template(&s, product, Some(msg)).await?)?.into_response())
+        }
     };
     if cadmin::slug_exists(&s.db, &input.slug, Some(id)).await? {
         let msg = format!("نامک «{}» قبلاً استفاده شده است.", input.slug);
@@ -346,7 +369,11 @@ fn parse_variant_form(f: &VariantForm) -> Result<VariantInput, String> {
         .unwrap_or(0) as i32;
     Ok(VariantInput {
         title,
-        sku: f.sku.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        sku: f
+            .sku
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
         price: domain::Rial::from_toman(toman).0,
         compare_at_price,
         stock,
@@ -361,8 +388,8 @@ pub async fn add_variant(
     Path(product_id): Path<Uuid>,
     Form(f): Form<VariantForm>,
 ) -> AppResult<Response> {
-    let v = parse_variant_form(&f)
-        .map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
+    let v =
+        parse_variant_form(&f).map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
     cadmin::add_variant(&s.db, product_id, &v).await?;
     s.home_cache.invalidate();
     Ok(Redirect::to(&format!("/admin/products/{}/edit", product_id)).into_response())
@@ -374,15 +401,19 @@ pub async fn update_variant(
     Path((product_id, variant_id)): Path<(Uuid, Uuid)>,
     Form(f): Form<VariantForm>,
 ) -> AppResult<Response> {
-    let v = parse_variant_form(&f)
-        .map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
+    let v =
+        parse_variant_form(&f).map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
     // وضعیت قبل از تغییر (برای تشخیص موجودشدن/کاهش قیمت → اعلان).
-    let before = cadmin::variant_snapshot(&s.db, variant_id).await.ok().flatten();
+    let before = cadmin::variant_snapshot(&s.db, variant_id)
+        .await
+        .ok()
+        .flatten();
     cadmin::update_variant(&s.db, variant_id, &v).await?;
     if let Some((old_price, old_stock, pid, pname, pslug)) = before {
         // موجود شد (۰ → مثبت): مشترکانِ هشدار را خبر کن.
         if old_stock <= 0 && v.stock > 0 {
-            let _ = db::notifications::notify_back_in_stock(&s.db, variant_id, &pname, &pslug).await;
+            let _ =
+                db::notifications::notify_back_in_stock(&s.db, variant_id, &pname, &pslug).await;
         }
         // کاهش قیمت: علاقه‌مندان را خبر کن.
         if v.price < old_price {
@@ -416,19 +447,15 @@ pub async fn add_image(
     let mut manual_path: Option<String> = None;
     let mut alt: Option<String> = None;
 
-    while let Some(field) = multipart
-        .next_field()
-        .await
-        .map_err(|e| AppError::Domain(domain::DomainError::Invalid(format!("آپلود نامعتبر: {e}"))))?
-    {
+    while let Some(field) = multipart.next_field().await.map_err(|e| {
+        AppError::Domain(domain::DomainError::Invalid(format!("آپلود نامعتبر: {e}")))
+    })? {
         match field.name() {
-            Some("file") => {
-                match crate::upload::save_image_field(field).await {
-                    Ok(Some(p)) => uploaded = Some(p),
-                    Ok(None) => {}
-                    Err(msg) => return Err(AppError::Domain(domain::DomainError::Invalid(msg))),
-                }
-            }
+            Some("file") => match crate::upload::save_image_field(field).await {
+                Ok(Some(p)) => uploaded = Some(p),
+                Ok(None) => {}
+                Err(msg) => return Err(AppError::Domain(domain::DomainError::Invalid(msg))),
+            },
             Some("path") => {
                 let v = field.text().await.unwrap_or_default();
                 let v = v.trim().to_string();

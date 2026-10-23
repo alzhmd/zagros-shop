@@ -53,7 +53,10 @@ pub async fn submit(
         user_id: user.as_ref().map(|u| u.id),
         author_name,
         rating,
-        title: f.title.map(|t| t.trim().to_string()).filter(|t| !t.is_empty()),
+        title: f
+            .title
+            .map(|t| t.trim().to_string())
+            .filter(|t| !t.is_empty()),
         body,
         is_verified,
     };
@@ -89,7 +92,14 @@ pub async fn ask(
         .filter(|n| !n.trim().is_empty())
         .or_else(|| f.author_name.clone().filter(|n| !n.trim().is_empty()))
         .unwrap_or_else(|| "کاربر مهمان".to_string());
-    db::qa::ask(&s.db, f.product_id, user.as_ref().map(|u| u.id), &author_name, &body).await?;
+    db::qa::ask(
+        &s.db,
+        f.product_id,
+        user.as_ref().map(|u| u.id),
+        &author_name,
+        &body,
+    )
+    .await?;
     Ok(Redirect::to(&format!("/product/{}?q=ok", f.slug)).into_response())
 }
 

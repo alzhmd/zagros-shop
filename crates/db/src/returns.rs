@@ -29,7 +29,8 @@ impl Return {
         reason_label(&self.reason)
     }
     pub fn refund_fa(&self) -> Option<String> {
-        self.refund_amount.map(|a| domain::Rial(a).format_toman_fa())
+        self.refund_amount
+            .map(|a| domain::Rial(a).format_toman_fa())
     }
     pub fn number_fa(&self) -> String {
         domain::fa_digits(&self.return_number.to_string())
@@ -65,10 +66,19 @@ pub fn reason_label(s: &str) -> &'static str {
 }
 
 pub const RETURN_STATUSES: [&str; 6] = [
-    "requested", "approved", "received", "refunded", "rejected", "cancelled",
+    "requested",
+    "approved",
+    "received",
+    "refunded",
+    "rejected",
+    "cancelled",
 ];
 pub const RETURN_REASONS: [&str; 5] = [
-    "defective", "wrong", "changed_mind", "not_as_described", "other",
+    "defective",
+    "wrong",
+    "changed_mind",
+    "not_as_described",
+    "other",
 ];
 
 #[derive(Debug, Clone, FromRow, Serialize)]
@@ -184,12 +194,10 @@ pub async fn history(db: &Db, return_id: Uuid) -> Result<Vec<StatusLog>, sqlx::E
 }
 
 pub async fn list_for_user(db: &Db, user_id: Uuid) -> Result<Vec<Return>, sqlx::Error> {
-    sqlx::query_as::<_, Return>(
-        "SELECT * FROM returns WHERE user_id = $1 ORDER BY created_at DESC",
-    )
-    .bind(user_id)
-    .fetch_all(db)
-    .await
+    sqlx::query_as::<_, Return>("SELECT * FROM returns WHERE user_id = $1 ORDER BY created_at DESC")
+        .bind(user_id)
+        .fetch_all(db)
+        .await
 }
 
 /// آیا برای این سفارش قبلاً مرجوعی باز/فعال ثبت شده؟ (جلوگیری از تکرار.)
@@ -295,9 +303,11 @@ pub async fn list_all(db: &Db, status: Option<&str>) -> Result<Vec<AdminReturnRo
             .await
         }
         None => {
-            sqlx::query_as::<_, AdminReturnRow>(&format!("{base} ORDER BY r.created_at DESC LIMIT 200"))
-                .fetch_all(db)
-                .await
+            sqlx::query_as::<_, AdminReturnRow>(&format!(
+                "{base} ORDER BY r.created_at DESC LIMIT 200"
+            ))
+            .fetch_all(db)
+            .await
         }
     }
 }

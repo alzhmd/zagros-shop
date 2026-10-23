@@ -45,12 +45,12 @@ struct CouponFormTemplate {
     code: String,
     description: String,
     kind: String,
-    value: String,        // درصد یا تومان (بسته به kind)
+    value: String, // درصد یا تومان (بسته به kind)
     min_order_toman: String,
     max_discount_toman: String,
     usage_limit: String,
     per_user_limit: String,
-    expires_at: String,   // YYYY-MM-DD
+    expires_at: String, // YYYY-MM-DD
     is_active: bool,
     used_count: i32,
     error: Option<String>,
@@ -96,10 +96,16 @@ fn edit_form_from(c: &Coupon, site_name: String, error: Option<String>) -> Coupo
         kind: c.kind.clone(),
         value,
         min_order_toman: (c.min_order / 10).to_string(),
-        max_discount_toman: c.max_discount.map(|m| (m / 10).to_string()).unwrap_or_default(),
+        max_discount_toman: c
+            .max_discount
+            .map(|m| (m / 10).to_string())
+            .unwrap_or_default(),
         usage_limit: c.usage_limit.map(|u| u.to_string()).unwrap_or_default(),
         per_user_limit: c.per_user_limit.to_string(),
-        expires_at: c.expires_at.map(|e| e.format("%Y-%m-%d").to_string()).unwrap_or_default(),
+        expires_at: c
+            .expires_at
+            .map(|e| e.format("%Y-%m-%d").to_string())
+            .unwrap_or_default(),
         is_active: c.is_active,
         used_count: c.used_count,
         error,
@@ -166,7 +172,11 @@ fn parse_coupon_form(f: &CouponForm) -> Result<CouponInput, String> {
     if code.is_empty() {
         return Err("کد تخفیف باید حروف/رقم انگلیسی باشد.".into());
     }
-    let kind = if f.kind == "fixed" { "fixed" } else { "percent" };
+    let kind = if f.kind == "fixed" {
+        "fixed"
+    } else {
+        "percent"
+    };
     let raw_value = parse_digits(f.value.trim())?;
     if raw_value <= 0 {
         return Err("مقدار تخفیف باید بزرگ‌تر از صفر باشد.".into());
@@ -188,7 +198,11 @@ fn parse_coupon_form(f: &CouponForm) -> Result<CouponInput, String> {
 
     Ok(CouponInput {
         code,
-        description: f.description.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        description: f
+            .description
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
         kind: kind.to_string(),
         value,
         min_order,
@@ -224,19 +238,19 @@ pub async fn update(
     Form(f): Form<CouponForm>,
 ) -> AppResult<Response> {
     let Some(existing) = coupons::find_by_id(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("کد تخفیف".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "کد تخفیف".into(),
+        )));
     };
     let input = match parse_coupon_form(&f) {
         Ok(i) => i,
         Err(msg) => {
-            return Ok(render(edit_form_from(&existing, s.site_name(), Some(msg)))?
-                .into_response())
+            return Ok(render(edit_form_from(&existing, s.site_name(), Some(msg)))?.into_response())
         }
     };
     if coupons::code_exists(&s.db, &input.code, Some(id)).await? {
         let msg = format!("کد «{}» قبلاً وجود دارد.", input.code);
-        return Ok(render(edit_form_from(&existing, s.site_name(), Some(msg)))?
-            .into_response());
+        return Ok(render(edit_form_from(&existing, s.site_name(), Some(msg)))?.into_response());
     }
     coupons::update(&s.db, id, &input).await?;
     Ok(Redirect::to("/admin/coupons").into_response())

@@ -112,11 +112,13 @@ pub async fn create_ticket(db: &Db, t: &NewTicket) -> Result<Ticket, sqlx::Error
     .fetch_one(&mut *tx)
     .await?;
 
-    sqlx::query("INSERT INTO ticket_messages (ticket_id, sender, body) VALUES ($1, 'customer', $2)")
-        .bind(ticket.id)
-        .bind(&t.body)
-        .execute(&mut *tx)
-        .await?;
+    sqlx::query(
+        "INSERT INTO ticket_messages (ticket_id, sender, body) VALUES ($1, 'customer', $2)",
+    )
+    .bind(ticket.id)
+    .bind(&t.body)
+    .execute(&mut *tx)
+    .await?;
     tx.commit().await?;
     Ok(ticket)
 }
@@ -137,12 +139,10 @@ pub async fn find_ticket_by_number(db: &Db, number: i64) -> Result<Option<Ticket
 }
 
 pub async fn list_tickets_for_user(db: &Db, user_id: Uuid) -> Result<Vec<Ticket>, sqlx::Error> {
-    sqlx::query_as::<_, Ticket>(
-        "SELECT * FROM tickets WHERE user_id = $1 ORDER BY updated_at DESC",
-    )
-    .bind(user_id)
-    .fetch_all(db)
-    .await
+    sqlx::query_as::<_, Ticket>("SELECT * FROM tickets WHERE user_id = $1 ORDER BY updated_at DESC")
+        .bind(user_id)
+        .fetch_all(db)
+        .await
 }
 
 pub async fn list_all_tickets(

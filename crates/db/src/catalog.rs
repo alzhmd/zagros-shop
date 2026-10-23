@@ -122,7 +122,11 @@ const CARD_SELECT: &str = r#"
 "#;
 
 /// پیشنهاد جستجوی زنده (autocomplete) — تطبیق فازی فارسی روی نام نرمال‌شده.
-pub async fn search_suggest(db: &Db, term: &str, limit: i64) -> Result<Vec<ProductCard>, sqlx::Error> {
+pub async fn search_suggest(
+    db: &Db,
+    term: &str,
+    limit: i64,
+) -> Result<Vec<ProductCard>, sqlx::Error> {
     let sql = format!(
         "{CARD_SELECT} WHERE p.is_active AND
          (p.name_norm ILIKE ('%' || fa_normalize($1) || '%') OR p.name_norm % fa_normalize($1))
@@ -211,7 +215,11 @@ pub async fn featured_products(db: &Db, limit: i64) -> Result<Vec<ProductCard>, 
 }
 
 /// اعمال شرط‌های WHERE روی یک QueryBuilder (مشترک بین count و list).
-fn apply_filters<'a>(qb: &mut QueryBuilder<'a, Postgres>, q: &'a ProductQuery, search: &'a Option<String>) {
+fn apply_filters<'a>(
+    qb: &mut QueryBuilder<'a, Postgres>,
+    q: &'a ProductQuery,
+    search: &'a Option<String>,
+) {
     qb.push(" WHERE p.is_active");
     if let Some(cat) = &q.category_slug {
         qb.push(" AND (c.slug = ");
@@ -269,7 +277,11 @@ fn apply_filters<'a>(qb: &mut QueryBuilder<'a, Postgres>, q: &'a ProductQuery, s
 
 /// فهرست محصولات با فیلتر، جستجوی فارسی و صفحه‌بندی.
 pub async fn list_products(db: &Db, q: &ProductQuery) -> Result<PagedProducts, sqlx::Error> {
-    let per_page = if q.per_page <= 0 { 12 } else { q.per_page.clamp(1, 60) };
+    let per_page = if q.per_page <= 0 {
+        12
+    } else {
+        q.per_page.clamp(1, 60)
+    };
     let page = q.page.max(1);
     let offset = (page - 1) * per_page;
     let search = q
@@ -394,9 +406,11 @@ pub async fn product_by_slug(db: &Db, slug: &str) -> Result<Option<ProductDetail
 
 /// همه‌ی slugهای محصولات فعال (برای sitemap).
 pub async fn all_active_slugs(db: &Db) -> Result<Vec<String>, sqlx::Error> {
-    sqlx::query_scalar::<_, String>("SELECT slug FROM products WHERE is_active ORDER BY created_at DESC")
-        .fetch_all(db)
-        .await
+    sqlx::query_scalar::<_, String>(
+        "SELECT slug FROM products WHERE is_active ORDER BY created_at DESC",
+    )
+    .fetch_all(db)
+    .await
 }
 
 /// slug + زمان آخرین تغییر هر محصول فعال — برای `lastmod` در sitemap.

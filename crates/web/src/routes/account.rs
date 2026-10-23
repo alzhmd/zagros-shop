@@ -129,7 +129,9 @@ pub async fn verify_otp(
 
     // موفق: مصرف کد و ساخت/یافتن کاربر.
     db::accounts::mark_otp_consumed(&s.db, otp.id).await?;
-    let is_new = db::accounts::find_by_mobile(&s.db, &mobile).await?.is_none();
+    let is_new = db::accounts::find_by_mobile(&s.db, &mobile)
+        .await?
+        .is_none();
     let user = db::accounts::upsert_by_mobile(&s.db, &mobile).await?;
 
     // کارت هدیه‌ی خوش‌آمدگویی برای کاربر جدید (در صورت فعال‌بودن در تنظیمات).
@@ -139,10 +141,22 @@ pub async fn verify_otp(
             let code = auth::generate_link_code();
             let days = s.settings.get_i64("giftcard.signup_days", 90).max(1);
             let expires = Utc::now() + Duration::days(days);
-            if db::gift_cards::issue(&s.db, &code, toman * 10, Some(user.id), Some(expires)).await.is_ok() {
+            if db::gift_cards::issue(&s.db, &code, toman * 10, Some(user.id), Some(expires))
+                .await
+                .is_ok()
+            {
                 let title = "کارت هدیه‌ی خوش‌آمدگویی 🎁".to_string();
-                let body = format!("کد {code} را در کیف پول وارد کنید و موجودی هدیه را دریافت کنید.");
-                let _ = db::notifications::create(&s.db, user.id, "coupon", &title, Some(&body), Some("/account/wallet")).await;
+                let body =
+                    format!("کد {code} را در کیف پول وارد کنید و موجودی هدیه را دریافت کنید.");
+                let _ = db::notifications::create(
+                    &s.db,
+                    user.id,
+                    "coupon",
+                    &title,
+                    Some(&body),
+                    Some("/account/wallet"),
+                )
+                .await;
             }
         }
     }
@@ -222,10 +236,19 @@ pub async fn dashboard(
     // جدیدترین سفارشِ «در جریان» برای بنر نیازمند توجه (لیست بر اساس created_at نزولی است).
     let active_order = orders.iter().find(|o| o.is_active()).cloned();
     let recent_orders: Vec<db::orders::Order> = orders.into_iter().take(4).collect();
-    let return_count = db::returns::list_for_user(&s.db, user.id).await.map(|v| v.len() as i64).unwrap_or(0);
-    let repair_count = db::repairs::list_for_user(&s.db, user.id).await.map(|v| v.len() as i64).unwrap_or(0);
+    let return_count = db::returns::list_for_user(&s.db, user.id)
+        .await
+        .map(|v| v.len() as i64)
+        .unwrap_or(0);
+    let repair_count = db::repairs::list_for_user(&s.db, user.id)
+        .await
+        .map(|v| v.len() as i64)
+        .unwrap_or(0);
     let wishlist_count = db::wishlist::count(&s.db, user.id).await.unwrap_or(0);
-    let address_count = db::accounts::list_addresses(&s.db, user.id).await.map(|v| v.len() as i64).unwrap_or(0);
+    let address_count = db::accounts::list_addresses(&s.db, user.id)
+        .await
+        .map(|v| v.len() as i64)
+        .unwrap_or(0);
     let fa = |n: i64| crate::filters::to_fa_digits(&n.to_string());
 
     // سطح باشگاه — همان منطقِ صفحه‌ی باشگاه، تا داشبورد و باشگاه هم‌خوان بمانند.
@@ -242,10 +265,18 @@ pub async fn dashboard(
 
     // درصد تکمیل پروفایل (۵ سیگنال): نام، ایمیل، تاریخ تولد، جنسیت، حداقل یک آدرس.
     let mut filled = 0i64;
-    if user.full_name.as_deref().map_or(false, |v| !v.trim().is_empty()) {
+    if user
+        .full_name
+        .as_deref()
+        .map_or(false, |v| !v.trim().is_empty())
+    {
         filled += 1;
     }
-    if user.email.as_deref().map_or(false, |v| !v.trim().is_empty()) {
+    if user
+        .email
+        .as_deref()
+        .map_or(false, |v| !v.trim().is_empty())
+    {
         filled += 1;
     }
     if user.birthdate.is_some() {
@@ -489,12 +520,20 @@ pub async fn wallet(
     let Some(user) = user else {
         return Ok(Redirect::to("/account/login").into_response());
     };
-    let history = db::wallet::history(&s.db, user.id, 50).await.unwrap_or_default();
+    let history = db::wallet::history(&s.db, user.id, 50)
+        .await
+        .unwrap_or_default();
     let points_fa = crate::filters::to_fa_digits(&user.points.to_string());
     let balance_fa = domain::Rial(user.wallet_balance).format_toman_fa();
     let (gift_msg, gift_ok) = match q.gift.as_deref() {
-        Some("ok") => (Some("کارت هدیه با موفقیت به کیف پول شما اضافه شد.".to_string()), true),
-        Some("bad") => (Some("کد کارت هدیه نامعتبر یا قبلاً استفاده شده است.".to_string()), false),
+        Some("ok") => (
+            Some("کارت هدیه با موفقیت به کیف پول شما اضافه شد.".to_string()),
+            true,
+        ),
+        Some("bad") => (
+            Some("کد کارت هدیه نامعتبر یا قبلاً استفاده شده است.".to_string()),
+            false,
+        ),
         Some("empty") => (Some("کد کارت هدیه را وارد کنید.".to_string()), false),
         _ => (None, false),
     };
@@ -528,7 +567,9 @@ pub async fn notifications(
     let Some(user) = user else {
         return Ok(Redirect::to("/account/login").into_response());
     };
-    let items = db::notifications::list_for_user(&s.db, user.id, 100).await.unwrap_or_default();
+    let items = db::notifications::list_for_user(&s.db, user.id, 100)
+        .await
+        .unwrap_or_default();
     // باز کردن صفحه = خواندن همه.
     let _ = db::notifications::mark_all_read(&s.db, user.id).await;
     let points_fa = crate::filters::to_fa_digits(&user.points.to_string());
@@ -557,7 +598,10 @@ pub async fn subscribe_stock(
         return Ok(Redirect::to("/account/login").into_response());
     };
     db::notifications::subscribe_stock(&s.db, user.id, f.variant_id).await?;
-    let back = f.slug.map(|sl| format!("/product/{sl}")).unwrap_or_else(|| "/".into());
+    let back = f
+        .slug
+        .map(|sl| format!("/product/{sl}"))
+        .unwrap_or_else(|| "/".into());
     Ok(Redirect::to(&back).into_response())
 }
 
@@ -613,7 +657,11 @@ pub async fn update_profile(
     let Some(user) = user else {
         return Ok(Redirect::to("/account/login").into_response());
     };
-    let full_name = f.full_name.as_deref().map(str::trim).filter(|s| !s.is_empty());
+    let full_name = f
+        .full_name
+        .as_deref()
+        .map(str::trim)
+        .filter(|s| !s.is_empty());
     let email = f.email.as_deref().map(str::trim).filter(|s| !s.is_empty());
     // اعتبارسنجی سبک ایمیل.
     if let Some(e) = email {
@@ -758,7 +806,12 @@ pub async fn add_address(
         phone: f.phone.trim().to_string(),
         province: f.province.trim().to_string(),
         city: f.city.trim().to_string(),
-        postal_code: f.postal_code.as_deref().map(str::trim).filter(|s| !s.is_empty()).map(String::from),
+        postal_code: f
+            .postal_code
+            .as_deref()
+            .map(str::trim)
+            .filter(|s| !s.is_empty())
+            .map(String::from),
         line: f.line.trim().to_string(),
         make_default: matches!(f.make_default.as_deref(), Some("on")),
     };

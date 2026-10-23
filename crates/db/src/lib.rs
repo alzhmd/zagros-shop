@@ -19,8 +19,8 @@ pub mod returns;
 pub mod reviews;
 pub mod sessions;
 pub mod settings;
-pub mod users_admin;
 pub mod support;
+pub mod users_admin;
 pub mod wallet;
 pub mod wishlist;
 

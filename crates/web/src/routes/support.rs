@@ -202,8 +202,8 @@ pub async fn chat_start(
         .filter(|n| !n.trim().is_empty())
         .or_else(|| user.as_ref().and_then(|u| u.full_name.clone()))
         .or_else(|| user.as_ref().map(|u| u.mobile.clone()));
-    let session = support::create_chat_session(&s.db, user.as_ref().map(|u| u.id), name.as_deref())
-        .await?;
+    let session =
+        support::create_chat_session(&s.db, user.as_ref().map(|u| u.id), name.as_deref()).await?;
     Ok(Redirect::to(&format!("/support/chat/{}", session.id)).into_response())
 }
 

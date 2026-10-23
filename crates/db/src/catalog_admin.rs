@@ -52,9 +52,11 @@ pub async fn list_all_products(
             .await
         }
         None => {
-            sqlx::query_as::<_, AdminProductRow>(&format!("{base} ORDER BY p.created_at DESC LIMIT 300"))
-                .fetch_all(db)
-                .await
+            sqlx::query_as::<_, AdminProductRow>(&format!(
+                "{base} ORDER BY p.created_at DESC LIMIT 300"
+            ))
+            .fetch_all(db)
+            .await
         }
     }
 }
@@ -174,7 +176,10 @@ pub async fn find_product(db: &Db, id: Uuid) -> Result<Option<Product>, sqlx::Er
 // ---------- تنوع‌ها ----------
 
 /// همه‌ی تنوع‌های یک محصول (شامل غیرفعال‌ها).
-pub async fn product_variants(db: &Db, product_id: Uuid) -> Result<Vec<ProductVariant>, sqlx::Error> {
+pub async fn product_variants(
+    db: &Db,
+    product_id: Uuid,
+) -> Result<Vec<ProductVariant>, sqlx::Error> {
     sqlx::query_as::<_, ProductVariant>(
         "SELECT * FROM product_variants WHERE product_id = $1 ORDER BY sort_order, price",
     )
@@ -186,18 +191,14 @@ pub async fn product_variants(db: &Db, product_id: Uuid) -> Result<Vec<ProductVa
 pub struct VariantInput {
     pub title: String,
     pub sku: Option<String>,
-    pub price: i64, // ریال
+    pub price: i64,                    // ریال
     pub compare_at_price: Option<i64>, // ریال؛ قیمت قبل از تخفیف
     pub stock: i32,
     pub is_active: bool,
     pub sort_order: i32,
 }
 
-pub async fn add_variant(
-    db: &Db,
-    product_id: Uuid,
-    v: &VariantInput,
-) -> Result<(), sqlx::Error> {
+pub async fn add_variant(db: &Db, product_id: Uuid, v: &VariantInput) -> Result<(), sqlx::Error> {
     sqlx::query(
         "INSERT INTO product_variants (product_id, title, sku, price, compare_at_price, stock, is_active, sort_order)
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8)",
@@ -277,12 +278,11 @@ pub async fn add_image(
 ) -> Result<(), sqlx::Error> {
     // اگر نخستین تصویر محصول است، خودبه‌خود primary شود.
     let mut tx = db.begin().await?;
-    let count = sqlx::query_scalar::<_, i64>(
-        "SELECT count(*) FROM product_images WHERE product_id = $1",
-    )
-    .bind(product_id)
-    .fetch_one(&mut *tx)
-    .await?;
+    let count =
+        sqlx::query_scalar::<_, i64>("SELECT count(*) FROM product_images WHERE product_id = $1")
+            .bind(product_id)
+            .fetch_one(&mut *tx)
+            .await?;
     sqlx::query(
         "INSERT INTO product_images (product_id, path, alt, sort_order, is_primary)
          VALUES ($1, $2, $3, $4, $5)",
@@ -327,12 +327,11 @@ pub async fn delete_image(db: &Db, image_id: Uuid) -> Result<(), sqlx::Error> {
 /// تعیین تصویر اصلی (primary) — بقیه‌ی تصاویر همان محصول غیر‌primary می‌شوند.
 pub async fn set_primary_image(db: &Db, image_id: Uuid) -> Result<(), sqlx::Error> {
     let mut tx = db.begin().await?;
-    let product_id = sqlx::query_scalar::<_, Uuid>(
-        "SELECT product_id FROM product_images WHERE id = $1",
-    )
-    .bind(image_id)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let product_id =
+        sqlx::query_scalar::<_, Uuid>("SELECT product_id FROM product_images WHERE id = $1")
+            .bind(image_id)
+            .fetch_optional(&mut *tx)
+            .await?;
     if let Some(pid) = product_id {
         sqlx::query("UPDATE product_images SET is_primary = (id = $1) WHERE product_id = $2")
             .bind(image_id)

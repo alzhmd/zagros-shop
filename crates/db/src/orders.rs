@@ -350,12 +350,10 @@ pub async fn reorder_into_cart(db: &Db, order_id: Uuid, cart_id: Uuid) -> Result
 }
 
 pub async fn list_for_user(db: &Db, user_id: Uuid) -> Result<Vec<Order>, sqlx::Error> {
-    sqlx::query_as::<_, Order>(
-        "SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC",
-    )
-    .bind(user_id)
-    .fetch_all(db)
-    .await
+    sqlx::query_as::<_, Order>("SELECT * FROM orders WHERE user_id = $1 ORDER BY created_at DESC")
+        .bind(user_id)
+        .fetch_all(db)
+        .await
 }
 
 pub async fn set_status(db: &Db, id: Uuid, status: &str) -> Result<(), sqlx::Error> {

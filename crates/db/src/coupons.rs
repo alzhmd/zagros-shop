@@ -340,7 +340,10 @@ mod tests {
 
     #[test]
     fn fixed_discount_never_exceeds_subtotal() {
-        assert_eq!(coupon("fixed", 5_000_000, None).discount_for(3_000_000), 3_000_000);
+        assert_eq!(
+            coupon("fixed", 5_000_000, None).discount_for(3_000_000),
+            3_000_000
+        );
     }
 
     #[test]

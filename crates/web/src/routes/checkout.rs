@@ -66,7 +66,9 @@ pub async fn page(
     let shipping = shipping_methods.first().map(|m| m.rial).unwrap_or(0);
     let total = subtotal + shipping;
 
-    let addresses = db::accounts::list_addresses(&s.db, user.id).await.unwrap_or_default();
+    let addresses = db::accounts::list_addresses(&s.db, user.id)
+        .await
+        .unwrap_or_default();
     let default_address_id = addresses
         .iter()
         .find(|a| a.is_default)
@@ -90,7 +92,8 @@ pub async fn page(
         coupon_msg: None,
         coupon_ok: false,
         points_fa: crate::filters::to_fa_digits(&user.points.to_string()),
-        points_value_fa: domain::Rial(user.points * s.settings.redeem_rial_per_point()).format_toman_fa(),
+        points_value_fa: domain::Rial(user.points * s.settings.redeem_rial_per_point())
+            .format_toman_fa(),
         has_points: user.points > 0,
         wallet_fa: domain::Rial(user.wallet_balance).format_toman_fa(),
         has_wallet: user.wallet_balance > 0,
@@ -138,12 +141,23 @@ pub async fn apply_coupon(
         .as_deref()
         .and_then(|k| s.settings.shipping_method(k))
         .map(|m| m.rial)
-        .unwrap_or_else(|| s.settings.shipping_methods().first().map(|m| m.rial).unwrap_or(0));
+        .unwrap_or_else(|| {
+            s.settings
+                .shipping_methods()
+                .first()
+                .map(|m| m.rial)
+                .unwrap_or(0)
+        });
 
     let mut discount: i64 = 0;
     let mut coupon_msg = None;
     let mut coupon_ok = false;
-    if let Some(code) = f.coupon_code.as_deref().map(str::trim).filter(|c| !c.is_empty()) {
+    if let Some(code) = f
+        .coupon_code
+        .as_deref()
+        .map(str::trim)
+        .filter(|c| !c.is_empty())
+    {
         match db::coupons::validate(&s.db, code, user.as_ref().map(|u| u.id), subtotal).await? {
             Ok((coupon, amount)) => {
                 discount = amount;
@@ -244,7 +258,12 @@ pub async fn submit(
             let province = form.province.clone().unwrap_or_default().trim().to_string();
             let city = form.city.clone().unwrap_or_default().trim().to_string();
             let address = form.address.clone().unwrap_or_default().trim().to_string();
-            if receiver.is_empty() || phone.is_empty() || province.is_empty() || city.is_empty() || address.is_empty() {
+            if receiver.is_empty()
+                || phone.is_empty()
+                || province.is_empty()
+                || city.is_empty()
+                || address.is_empty()
+            {
                 return Err(AppError::Domain(domain::DomainError::Invalid(
                     "اطلاعات آدرس ارسال کامل نیست.".into(),
                 )));
@@ -306,7 +325,12 @@ pub async fn submit(
     let subtotal: i64 = items.iter().map(|i| i.line_total()).sum();
     let mut discount = db::orders::OrderDiscount::default();
     let mut applied_coupon: Option<db::coupons::Coupon> = None;
-    if let Some(code) = form.coupon_code.as_deref().map(str::trim).filter(|c| !c.is_empty()) {
+    if let Some(code) = form
+        .coupon_code
+        .as_deref()
+        .map(str::trim)
+        .filter(|c| !c.is_empty())
+    {
         match db::coupons::validate(&s.db, code, Some(user.id), subtotal).await? {
             Ok((coupon, amount)) => {
                 discount = db::orders::OrderDiscount {
@@ -363,7 +387,12 @@ pub async fn submit(
     })?;
 
     // یادداشت سفارش (در صورت وجود).
-    if let Some(note) = form.note.as_deref().map(str::trim).filter(|n| !n.is_empty()) {
+    if let Some(note) = form
+        .note
+        .as_deref()
+        .map(str::trim)
+        .filter(|n| !n.is_empty())
+    {
         let _ = db::orders::set_note(&s.db, order.id, note).await;
     }
 
@@ -401,9 +430,14 @@ pub async fn submit(
 
     // ثبت استفاده‌ی کوپن (پس از ساخت موفق سفارش).
     if let Some(coupon) = &applied_coupon {
-        if let Err(e) =
-            db::coupons::record_redemption(&s.db, coupon.id, Some(user.id), order.id, discount.amount)
-                .await
+        if let Err(e) = db::coupons::record_redemption(
+            &s.db,
+            coupon.id,
+            Some(user.id),
+            order.id,
+            discount.amount,
+        )
+        .await
         {
             tracing::error!(error = %e, "ثبت استفاده‌ی کوپن شکست خورد");
         }
@@ -433,7 +467,11 @@ pub async fn submit(
     };
 
     let payment = db::orders::create_payment(&s.db, order.id, gateway.name(), order.total).await?;
-    let callback = format!("{}/payment/callback?provider={}", s.base_url, gateway.name());
+    let callback = format!(
+        "{}/payment/callback?provider={}",
+        s.base_url,
+        gateway.name()
+    );
     let req = payments::PayRequest {
         amount_rial: order.total as u64,
         order_id: order.order_number.to_string(),
@@ -588,7 +626,9 @@ pub async fn order_result(
     CurrentUser(user): CurrentUser,
 ) -> AppResult<axum::response::Response> {
     let Some(order) = db::orders::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     // فقط صاحب سفارش ببیند.
     if let (Some(u), Some(ou)) = (&user, order.user_id) {
@@ -602,11 +642,16 @@ pub async fn order_result(
     let paid = order.status == "paid";
     let is_cod = order.payment_method == "cod";
     // مشتری می‌تواند سفارش پرداخت‌نشده/در انتظار را لغو کند.
-    let can_cancel = matches!(order.status.as_str(), "awaiting_payment" | "pending" | "cod_pending");
+    let can_cancel = matches!(
+        order.status.as_str(),
+        "awaiting_payment" | "pending" | "cod_pending"
+    );
     let cancelled = order.status == "cancelled";
     // مرجوعی فقط برای سفارش تحویل‌شده و در صورت نبود مرجوعی باز.
     let can_return = order.status == "delivered"
-        && !db::returns::exists_open_for_order(&s.db, order.id).await.unwrap_or(true);
+        && !db::returns::exists_open_for_order(&s.db, order.id)
+            .await
+            .unwrap_or(true);
     let timeline = build_timeline(&order.status, is_cod);
     render(OrderResultTemplate {
         site_name: s.site_name(),
@@ -643,7 +688,9 @@ pub async fn invoice(
     CurrentUser(user): CurrentUser,
 ) -> AppResult<axum::response::Response> {
     let Some(order) = db::orders::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     // فقط صاحب سفارش یا مدیر.
     let allowed = match &user {
@@ -655,7 +702,8 @@ pub async fn invoice(
     }
     let items = db::orders::items_for(&s.db, order.id).await?;
     let order_number_fa = crate::filters::to_fa_digits(&order.order_number.to_string());
-    let date_fa = crate::filters::to_fa_digits(&order.created_at.format("%Y-%m-%d %H:%M").to_string());
+    let date_fa =
+        crate::filters::to_fa_digits(&order.created_at.format("%Y-%m-%d %H:%M").to_string());
     render(InvoiceTemplate {
         site_name: s.site_name(),
         contact_phone: s.settings.contact_phone(),
@@ -679,7 +727,9 @@ pub async fn reorder(
         return Ok(Redirect::to("/account/login").into_response());
     };
     let Some(order) = db::orders::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     if order.user_id != Some(user.id) {
         return Err(AppError::Domain(domain::DomainError::Unauthorized));
@@ -700,12 +750,17 @@ pub async fn cancel(
         return Ok(Redirect::to("/account/login").into_response());
     };
     let Some(order) = db::orders::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("سفارش".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "سفارش".into(),
+        )));
     };
     if order.user_id != Some(user.id) {
         return Err(AppError::Domain(domain::DomainError::Unauthorized));
     }
-    if !matches!(order.status.as_str(), "awaiting_payment" | "pending" | "cod_pending") {
+    if !matches!(
+        order.status.as_str(),
+        "awaiting_payment" | "pending" | "cod_pending"
+    ) {
         return Err(AppError::Domain(domain::DomainError::Invalid(
             "این سفارش در وضعیتی نیست که قابل لغو باشد.".into(),
         )));

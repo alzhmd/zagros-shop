@@ -154,8 +154,16 @@ fn parse_category_form(f: &CategoryForm, self_id: Option<Uuid>) -> Result<Catego
         name,
         slug,
         parent_id,
-        description: f.description.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
-        icon: f.icon.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        description: f
+            .description
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
+        icon: f
+            .icon
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
         sort_order,
         is_active: checkbox(&f.is_active),
     })
@@ -171,7 +179,8 @@ pub async fn category_create(
         Err(msg) => return category_form_error_new(&s, msg).await,
     };
     if cadmin::category_slug_exists(&s.db, &input.slug, None).await? {
-        return category_form_error_new(&s, format!("نامک «{}» قبلاً استفاده شده است.", input.slug)).await;
+        return category_form_error_new(&s, format!("نامک «{}» قبلاً استفاده شده است.", input.slug))
+            .await;
     }
     cadmin::create_category(&s.db, &input).await?;
     s.home_cache.invalidate();
@@ -185,11 +194,15 @@ pub async fn category_update(
     Form(f): Form<CategoryForm>,
 ) -> AppResult<Response> {
     let Some(cat) = cadmin::find_category(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("دسته".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "دسته".into(),
+        )));
     };
     let input = match parse_category_form(&f, Some(id)) {
         Ok(i) => i,
-        Err(msg) => return Ok(render(build_category_template(&s, cat, Some(msg)).await?)?.into_response()),
+        Err(msg) => {
+            return Ok(render(build_category_template(&s, cat, Some(msg)).await?)?.into_response())
+        }
     };
     if cadmin::category_slug_exists(&s.db, &input.slug, Some(id)).await? {
         let msg = format!("نامک «{}» قبلاً استفاده شده است.", input.slug);
@@ -330,7 +343,11 @@ fn parse_brand_form(f: &BrandForm) -> Result<BrandInput, String> {
     Ok(BrandInput {
         name,
         slug,
-        logo: f.logo.clone().map(|s| s.trim().to_string()).filter(|s| !s.is_empty()),
+        logo: f
+            .logo
+            .clone()
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty()),
     })
 }
 
@@ -362,7 +379,9 @@ pub async fn brand_update(
     Form(f): Form<BrandForm>,
 ) -> AppResult<Response> {
     let Some(b) = cadmin::find_brand(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("برند".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "برند".into(),
+        )));
     };
     let input = match parse_brand_form(&f) {
         Ok(i) => i,

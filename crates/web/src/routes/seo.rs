@@ -22,7 +22,18 @@ pub async fn sitemap(State(state): State<AppState>) -> AppResult<impl IntoRespon
     );
 
     // صفحات ثابت.
-    for path in ["/", "/products", "/categories", "/offers", "/repair", "/support", "/about", "/contact", "/faq", "/terms"] {
+    for path in [
+        "/",
+        "/products",
+        "/categories",
+        "/offers",
+        "/repair",
+        "/support",
+        "/about",
+        "/contact",
+        "/faq",
+        "/terms",
+    ] {
         xml.push_str(&format!(
             "  <url><loc>{}</loc></url>\n",
             escape_xml(&format!("{base}{path}"))

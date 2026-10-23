@@ -74,7 +74,12 @@ pub async fn submit(
         brand: f.brand.filter(|s| !s.trim().is_empty()),
         model: f.model.filter(|s| !s.trim().is_empty()),
         problem: f.problem,
-        method: if f.method == "onsite" { "onsite" } else { "dropoff" }.to_string(),
+        method: if f.method == "onsite" {
+            "onsite"
+        } else {
+            "dropoff"
+        }
+        .to_string(),
         province: f.province.filter(|s| !s.trim().is_empty()),
         city: f.city.filter(|s| !s.trim().is_empty()),
         address: f.address.filter(|s| !s.trim().is_empty()),
@@ -100,7 +105,9 @@ pub async fn track(State(s): State<AppState>, Path(ticket): Path<i64>) -> AppRes
         .ok_or_else(|| domain::DomainError::NotFound("درخواست تعمیر".into()))?;
     let history = db::repairs::status_history(&s.db, repair.id).await?;
     let ticket_fa = crate::filters::to_fa_digits(&repair.ticket_number.to_string());
-    let cost_estimate_fa = repair.cost_estimate.map(|c| domain::Rial(c).format_toman_fa());
+    let cost_estimate_fa = repair
+        .cost_estimate
+        .map(|c| domain::Rial(c).format_toman_fa());
 
     render(TrackTemplate {
         site_name: s.site_name(),

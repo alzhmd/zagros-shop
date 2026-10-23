@@ -31,7 +31,9 @@ pub async fn award_and_notify(state: &AppState, user: &User, order: &Order) {
         let title = format!("سفارش #{num} ثبت شد");
         let body = format!("مبلغ: {}", domain::Rial(order.total).format_toman_fa());
         let url = format!("/order/{}", order.id);
-        let _ = db::notifications::create(&state.db, user.id, "order", &title, Some(&body), Some(&url)).await;
+        let _ =
+            db::notifications::create(&state.db, user.id, "order", &title, Some(&body), Some(&url))
+                .await;
     }
 
     // اطلاع‌رسانی تلگرام (فقط اگر ربات فعال و حساب متصل باشد).
@@ -56,7 +58,11 @@ pub async fn award_and_notify(state: &AppState, user: &User, order: &Order) {
         );
         state
             .mailer
-            .send(email, &format!("تأیید سفارش #{}", order.order_number), &body)
+            .send(
+                email,
+                &format!("تأیید سفارش #{}", order.order_number),
+                &body,
+            )
             .await;
     }
 }

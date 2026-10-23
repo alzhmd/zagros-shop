@@ -15,11 +15,13 @@ pub async fn toggle(db: &Db, user_id: Uuid, product_id: Uuid) -> Result<bool, sq
     if deleted > 0 {
         return Ok(false);
     }
-    sqlx::query("INSERT INTO wishlists (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING")
-        .bind(user_id)
-        .bind(product_id)
-        .execute(db)
-        .await?;
+    sqlx::query(
+        "INSERT INTO wishlists (user_id, product_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
+    )
+    .bind(user_id)
+    .bind(product_id)
+    .execute(db)
+    .await?;
     Ok(true)
 }
 

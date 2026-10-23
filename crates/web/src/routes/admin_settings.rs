@@ -117,13 +117,20 @@ pub async fn save(
     }
     let cod_province = f.cod_province.trim();
     let shipping = parse_digits(f.shipping_toman.as_deref().unwrap_or("0").trim()).unwrap_or(0);
-    let rate = parse_digits(f.rial_per_point.as_deref().unwrap_or("100000").trim()).unwrap_or(100_000);
+    let rate =
+        parse_digits(f.rial_per_point.as_deref().unwrap_or("100000").trim()).unwrap_or(100_000);
 
     // نوشتن کلید‌ها در جدول settings.
     let pairs: [(&str, String); 6] = [
         ("site.name", site_name.to_string()),
-        ("site.contact_phone", f.contact_phone.unwrap_or_default().trim().to_string()),
-        ("site.contact_address", f.contact_address.unwrap_or_default().trim().to_string()),
+        (
+            "site.contact_phone",
+            f.contact_phone.unwrap_or_default().trim().to_string(),
+        ),
+        (
+            "site.contact_address",
+            f.contact_address.unwrap_or_default().trim().to_string(),
+        ),
         ("shipping.flat_toman", shipping.max(0).to_string()),
         ("cod.province", cod_province.to_string()),
         ("loyalty.rial_per_point", rate.max(1).to_string()),
@@ -135,27 +142,61 @@ pub async fn save(
     db::settings::set(
         &s.db,
         "payments.enabled",
-        if checkbox(&f.payments_enabled) { "true" } else { "false" },
+        if checkbox(&f.payments_enabled) {
+            "true"
+        } else {
+            "false"
+        },
     )
     .await?;
 
     // روش‌های ارسال + باشگاه + کارت هدیه.
     let num = |o: &Option<String>, d: i64| {
-        parse_digits(o.as_deref().unwrap_or("").trim()).unwrap_or(d).max(0).to_string()
+        parse_digits(o.as_deref().unwrap_or("").trim())
+            .unwrap_or(d)
+            .max(0)
+            .to_string()
     };
     let txt = |o: &Option<String>| o.clone().unwrap_or_default().trim().to_string();
     let extra: [(&str, String); 13] = [
         ("shipping.normal.toman", num(&f.ship_normal_toman, 0)),
         ("shipping.normal.eta", txt(&f.ship_normal_eta)),
-        ("shipping.express.enabled", if checkbox(&f.ship_express_on) { "true" } else { "false" }.to_string()),
+        (
+            "shipping.express.enabled",
+            if checkbox(&f.ship_express_on) {
+                "true"
+            } else {
+                "false"
+            }
+            .to_string(),
+        ),
         ("shipping.express.toman", num(&f.ship_express_toman, 50_000)),
         ("shipping.express.eta", txt(&f.ship_express_eta)),
-        ("shipping.instant.enabled", if checkbox(&f.ship_instant_on) { "true" } else { "false" }.to_string()),
-        ("shipping.instant.toman", num(&f.ship_instant_toman, 120_000)),
+        (
+            "shipping.instant.enabled",
+            if checkbox(&f.ship_instant_on) {
+                "true"
+            } else {
+                "false"
+            }
+            .to_string(),
+        ),
+        (
+            "shipping.instant.toman",
+            num(&f.ship_instant_toman, 120_000),
+        ),
         ("shipping.instant.eta", txt(&f.ship_instant_eta)),
         ("club.silver_threshold", num(&f.silver_threshold, 200)),
         ("club.gold_threshold", num(&f.gold_threshold, 1000)),
-        ("giftcard.signup_enabled", if checkbox(&f.gift_signup_on) { "true" } else { "false" }.to_string()),
+        (
+            "giftcard.signup_enabled",
+            if checkbox(&f.gift_signup_on) {
+                "true"
+            } else {
+                "false"
+            }
+            .to_string(),
+        ),
         ("giftcard.signup_toman", num(&f.gift_signup_toman, 50_000)),
         ("giftcard.signup_days", num(&f.gift_signup_days, 90)),
     ];

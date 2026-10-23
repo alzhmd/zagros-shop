@@ -33,9 +33,7 @@ pub fn generate_session_token() -> String {
 pub fn hash_secret(secret: &str) -> Result<String, argon2::password_hash::Error> {
     let salt = SaltString::generate(&mut OsRng);
     let argon2 = Argon2::default();
-    Ok(argon2
-        .hash_password(secret.as_bytes(), &salt)?
-        .to_string())
+    Ok(argon2.hash_password(secret.as_bytes(), &salt)?.to_string())
 }
 
 /// تأیید یک رشته در برابر هش ذخیره‌شده.
@@ -105,10 +103,22 @@ mod tests {
 
     #[test]
     fn mobile_normalization() {
-        assert_eq!(normalize_mobile("09123456789").as_deref(), Some("09123456789"));
-        assert_eq!(normalize_mobile("+989123456789").as_deref(), Some("09123456789"));
-        assert_eq!(normalize_mobile("9123456789").as_deref(), Some("09123456789"));
-        assert_eq!(normalize_mobile("۰۹۱۲۳۴۵۶۷۸۹").as_deref(), Some("09123456789"));
+        assert_eq!(
+            normalize_mobile("09123456789").as_deref(),
+            Some("09123456789")
+        );
+        assert_eq!(
+            normalize_mobile("+989123456789").as_deref(),
+            Some("09123456789")
+        );
+        assert_eq!(
+            normalize_mobile("9123456789").as_deref(),
+            Some("09123456789")
+        );
+        assert_eq!(
+            normalize_mobile("۰۹۱۲۳۴۵۶۷۸۹").as_deref(),
+            Some("09123456789")
+        );
         assert_eq!(normalize_mobile("123"), None);
     }
 }

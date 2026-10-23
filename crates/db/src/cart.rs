@@ -49,20 +49,17 @@ pub async fn find_cart(db: &Db, session_key: &str) -> Result<Option<Uuid>, sqlx:
 
 /// یافتن یا ساخت سبد برای یک session key (مهمان یا کاربر).
 pub async fn get_or_create_cart(db: &Db, session_key: &str) -> Result<Uuid, sqlx::Error> {
-    if let Some(id) =
-        sqlx::query_scalar::<_, Uuid>("SELECT id FROM carts WHERE session_key = $1")
-            .bind(session_key)
-            .fetch_optional(db)
-            .await?
+    if let Some(id) = sqlx::query_scalar::<_, Uuid>("SELECT id FROM carts WHERE session_key = $1")
+        .bind(session_key)
+        .fetch_optional(db)
+        .await?
     {
         return Ok(id);
     }
-    sqlx::query_scalar::<_, Uuid>(
-        "INSERT INTO carts (session_key) VALUES ($1) RETURNING id",
-    )
-    .bind(session_key)
-    .fetch_one(db)
-    .await
+    sqlx::query_scalar::<_, Uuid>("INSERT INTO carts (session_key) VALUES ($1) RETURNING id")
+        .bind(session_key)
+        .fetch_one(db)
+        .await
 }
 
 /// افزودن یا افزایش یک قلم در سبد.
@@ -144,7 +141,12 @@ pub async fn saved_items(db: &Db, cart_id: Uuid) -> Result<Vec<CartItemView>, sq
 }
 
 /// تغییر وضعیت «ذخیره برای بعد» یک قلم.
-pub async fn set_saved(db: &Db, cart_id: Uuid, item_id: Uuid, saved: bool) -> Result<(), sqlx::Error> {
+pub async fn set_saved(
+    db: &Db,
+    cart_id: Uuid,
+    item_id: Uuid,
+    saved: bool,
+) -> Result<(), sqlx::Error> {
     sqlx::query("UPDATE cart_items SET saved_for_later = $1 WHERE id = $2 AND cart_id = $3")
         .bind(saved)
         .bind(item_id)

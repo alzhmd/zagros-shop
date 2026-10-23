@@ -74,7 +74,8 @@ impl PaymentGateway for Zibal {
     }
 
     async fn verify(&self, token: &str, _amount_rial: u64) -> Result<PayResult, GwError> {
-        let body = json!({ "merchant": self.merchant, "trackId": token.parse::<i64>().unwrap_or(0) });
+        let body =
+            json!({ "merchant": self.merchant, "trackId": token.parse::<i64>().unwrap_or(0) });
         let resp = self
             .client
             .post(VERIFY_URL)

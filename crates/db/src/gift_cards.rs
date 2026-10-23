@@ -68,14 +68,16 @@ impl RedeemError {
 
 /// مصرف کارت هدیه: موجودی را صفر و مبلغ را برمی‌گرداند تا فراخوان به کیف پول واریز کند.
 /// اتمیک با قفل ردیف. مقدار موفق = مبلغ ریالی واریزشدنی.
-pub async fn redeem(db: &Db, code: &str, user_id: Uuid) -> Result<Result<i64, RedeemError>, sqlx::Error> {
+pub async fn redeem(
+    db: &Db,
+    code: &str,
+    user_id: Uuid,
+) -> Result<Result<i64, RedeemError>, sqlx::Error> {
     let mut tx = db.begin().await?;
-    let row = sqlx::query_as::<_, GiftCard>(
-        "SELECT * FROM gift_cards WHERE code = $1 FOR UPDATE",
-    )
-    .bind(code)
-    .fetch_optional(&mut *tx)
-    .await?;
+    let row = sqlx::query_as::<_, GiftCard>("SELECT * FROM gift_cards WHERE code = $1 FOR UPDATE")
+        .bind(code)
+        .fetch_optional(&mut *tx)
+        .await?;
 
     let Some(card) = row else {
         tx.rollback().await?;

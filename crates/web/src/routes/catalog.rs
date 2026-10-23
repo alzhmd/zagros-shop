@@ -5,10 +5,10 @@ use axum::{
     response::Html,
 };
 use db::catalog::{self, ProductQuery, ProductSort};
-use db::models::{Brand, Category, ProductCard, Product, ProductImage, ProductVariant};
+use db::models::{Brand, Category, Product, ProductCard, ProductImage, ProductVariant};
 use serde::{Deserialize, Deserializer};
 
-use crate::filters::{toman_string, to_fa_digits};
+use crate::filters::{to_fa_digits, toman_string};
 
 #[derive(Debug, Deserialize, Default)]
 pub struct CatalogParams {
@@ -106,7 +106,10 @@ struct AttrFilterValue {
 }
 
 fn build_tree(categories: Vec<Category>) -> Vec<CategoryNode> {
-    let parents: Vec<&Category> = categories.iter().filter(|c| c.parent_id.is_none()).collect();
+    let parents: Vec<&Category> = categories
+        .iter()
+        .filter(|c| c.parent_id.is_none())
+        .collect();
     parents
         .iter()
         .map(|p| CategoryNode {
@@ -194,19 +197,29 @@ pub async fn index(
     Query(all_pairs): Query<Vec<(String, String)>>,
 ) -> AppResult<Html<String>> {
     // استخراج فیلترهای ویژگی از پارامترهای `attr.<slug>=<value>` (چندمقداری مجاز).
-    let mut attr_map: std::collections::BTreeMap<String, Vec<String>> = std::collections::BTreeMap::new();
+    let mut attr_map: std::collections::BTreeMap<String, Vec<String>> =
+        std::collections::BTreeMap::new();
     for (k, v) in &all_pairs {
         if let Some(slug) = k.strip_prefix("attr.") {
             if !slug.is_empty() && !v.trim().is_empty() {
-                attr_map.entry(slug.to_string()).or_default().push(v.clone());
+                attr_map
+                    .entry(slug.to_string())
+                    .or_default()
+                    .push(v.clone());
             }
         }
     }
-    let attrs_vec: Vec<(String, Vec<String>)> = attr_map.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+    let attrs_vec: Vec<(String, Vec<String>)> = attr_map
+        .iter()
+        .map(|(k, v)| (k.clone(), v.clone()))
+        .collect();
     // پسوند query برای حفظ فیلتر ویژگی‌ها در لینک‌های صفحه‌بندی/مرتب‌سازی.
     let attr_qs: String = attr_map
         .iter()
-        .flat_map(|(slug, vals)| vals.iter().map(move |v| format!("&attr.{}={}", slug, urlenc(v))))
+        .flat_map(|(slug, vals)| {
+            vals.iter()
+                .map(move |v| format!("&attr.{}={}", slug, urlenc(v)))
+        })
         .collect();
 
     let sort = ProductSort::parse(params.sort.as_deref().unwrap_or("newest"));
@@ -233,7 +246,9 @@ pub async fn index(
     let paged = catalog::list_products(&state.db, &q).await?;
 
     // ویژگی‌های قابل‌فیلتر با وضعیت انتخاب.
-    let filterable = db::attributes::filterable(&state.db).await.unwrap_or_default();
+    let filterable = db::attributes::filterable(&state.db)
+        .await
+        .unwrap_or_default();
     let attr_groups: Vec<AttrFilterGroup> = filterable
         .into_iter()
         .map(|fa| {
@@ -294,7 +309,11 @@ pub async fn index(
         });
     }
     if let Some(bv) = params.brand.as_deref().filter(|s| !s.is_empty()) {
-        let name = brands.iter().find(|b| b.slug == bv).map(|b| b.name.clone()).unwrap_or_else(|| bv.to_string());
+        let name = brands
+            .iter()
+            .find(|b| b.slug == bv)
+            .map(|b| b.name.clone())
+            .unwrap_or_else(|| bv.to_string());
         active_chips.push(ActiveChip {
             label: format!("برند: {name}"),
             remove_url: filters_without(&params, &attr_map, Some("brand"), None),
@@ -466,17 +485,27 @@ pub async fn product(
         .map(|img| absolute_url(&base_url, &img.path));
 
     // داده‌های نقد/امتیاز/ویژگی/علاقه‌مندی/مرتبط.
-    let rating = db::reviews::summary(&state.db, pid).await.unwrap_or_default();
-    let reviews = db::reviews::approved_for_product(&state.db, pid).await.unwrap_or_default();
-    let attrs = db::attributes::for_product(&state.db, pid).await.unwrap_or_default();
+    let rating = db::reviews::summary(&state.db, pid)
+        .await
+        .unwrap_or_default();
+    let reviews = db::reviews::approved_for_product(&state.db, pid)
+        .await
+        .unwrap_or_default();
+    let attrs = db::attributes::for_product(&state.db, pid)
+        .await
+        .unwrap_or_default();
     let related = catalog::related_products(&state.db, pid, detail.product.category_id, 4)
         .await
         .unwrap_or_default();
-    let questions = db::qa::approved_for_product(&state.db, pid).await.unwrap_or_default();
+    let questions = db::qa::approved_for_product(&state.db, pid)
+        .await
+        .unwrap_or_default();
 
     let (in_wishlist, review_author) = match &user {
         Some(u) => (
-            db::wishlist::contains(&state.db, u.id, pid).await.unwrap_or(false),
+            db::wishlist::contains(&state.db, u.id, pid)
+                .await
+                .unwrap_or(false),
             u.full_name.clone().unwrap_or_default(),
         ),
         None => (false, String::new()),
@@ -493,7 +522,9 @@ pub async fn product(
         .filter(|id| *id != pid)
         .take(8)
         .collect();
-    let recent = catalog::cards_by_ids(&state.db, &prev_ids).await.unwrap_or_default();
+    let recent = catalog::cards_by_ids(&state.db, &prev_ids)
+        .await
+        .unwrap_or_default();
     // فهرست جدید: محصول جاری در ابتدا، سپس قبلی‌ها، یکتا، حداکثر ۸.
     let mut new_ids: Vec<String> = vec![pid.to_string()];
     for id in &prev_ids {

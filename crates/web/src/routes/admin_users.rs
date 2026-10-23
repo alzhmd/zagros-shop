@@ -168,11 +168,17 @@ pub async fn adjust_points(
     Form(f): Form<PointsForm>,
 ) -> AppResult<Response> {
     let Some(user) = users_admin::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("کاربر".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "کاربر".into(),
+        )));
     };
     let amount = parse_digits(f.amount.trim())
         .map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
-    let delta = if f.direction == "deduct" { -amount } else { amount };
+    let delta = if f.direction == "deduct" {
+        -amount
+    } else {
+        amount
+    };
     let note = f.note.as_deref().map(str::trim).filter(|s| !s.is_empty());
     db::loyalty::add_transaction(&s.db, user.id, delta, "manual", None, note).await?;
     Ok(Redirect::to(&format!("/admin/users/{id}")).into_response())
@@ -194,11 +200,17 @@ pub async fn adjust_wallet(
     Form(f): Form<WalletForm>,
 ) -> AppResult<Response> {
     let Some(user) = users_admin::find(&s.db, id).await? else {
-        return Err(AppError::Domain(domain::DomainError::NotFound("کاربر".into())));
+        return Err(AppError::Domain(domain::DomainError::NotFound(
+            "کاربر".into(),
+        )));
     };
     let toman = parse_digits(f.amount_toman.trim())
         .map_err(|m| AppError::Domain(domain::DomainError::Invalid(m)))?;
-    let delta = if f.direction == "deduct" { -(toman * 10) } else { toman * 10 };
+    let delta = if f.direction == "deduct" {
+        -(toman * 10)
+    } else {
+        toman * 10
+    };
     let note = f.note.as_deref().map(str::trim).filter(|s| !s.is_empty());
     db::wallet::add_transaction(&s.db, user.id, delta, "admin", None, note)
         .await

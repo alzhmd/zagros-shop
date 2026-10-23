@@ -300,7 +300,10 @@ impl AdminReviewRow {
     }
 }
 
-pub async fn list_all(db: &Db, status_filter: Option<&str>) -> Result<Vec<AdminReviewRow>, sqlx::Error> {
+pub async fn list_all(
+    db: &Db,
+    status_filter: Option<&str>,
+) -> Result<Vec<AdminReviewRow>, sqlx::Error> {
     let base = r#"
         SELECT r.id, r.product_id, p.name AS product_name, p.slug AS product_slug,
                r.author_name, r.rating, r.title, r.body, r.is_verified, r.status, r.created_at

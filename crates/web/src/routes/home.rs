@@ -25,19 +25,27 @@ pub async fn index(State(state): State<AppState>) -> AppResult<Html<String>> {
     let data = match state.home_cache.get() {
         Some(d) => d,
         None => {
-            let banners = db::banners::active_for(&state.db, "hero").await.unwrap_or_default();
+            let banners = db::banners::active_for(&state.db, "hero")
+                .await
+                .unwrap_or_default();
             let strip = db::banners::active_for(&state.db, "strip")
                 .await
                 .unwrap_or_default()
                 .into_iter()
                 .next();
             let featured = catalog::featured_products(&state.db, 8).await?;
-            let deals = catalog::deal_products(&state.db, 8).await.unwrap_or_default();
+            let deals = catalog::deal_products(&state.db, 8)
+                .await
+                .unwrap_or_default();
             let popular = catalog::most_viewed(&state.db, 8).await.unwrap_or_default();
-            let newest = catalog::newest_products(&state.db, 8).await.unwrap_or_default();
+            let newest = catalog::newest_products(&state.db, 8)
+                .await
+                .unwrap_or_default();
             let categories = catalog::list_categories(&state.db).await?;
-            let top_categories: Vec<Category> =
-                categories.into_iter().filter(|c| c.parent_id.is_none()).collect();
+            let top_categories: Vec<Category> = categories
+                .into_iter()
+                .filter(|c| c.parent_id.is_none())
+                .collect();
             let d = crate::state::HomeData {
                 banners,
                 strip,

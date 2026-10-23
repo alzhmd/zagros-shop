@@ -131,7 +131,9 @@ impl ProductCard {
     /// درصد تخفیف (گردشده).
     pub fn discount_pct(&self) -> i64 {
         match self.compare_at {
-            Some(c) if c > self.sell_price() && c > 0 => ((c - self.sell_price()) * 100 + c / 2) / c,
+            Some(c) if c > self.sell_price() && c > 0 => {
+                ((c - self.sell_price()) * 100 + c / 2) / c
+            }
             _ => 0,
         }
     }

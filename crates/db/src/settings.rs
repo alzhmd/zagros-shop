@@ -19,10 +19,11 @@ pub async fn get_all(db: &Db) -> Result<HashMap<String, String>, sqlx::Error> {
 
 /// مقدار یک کلید (در صورت وجود).
 pub async fn get(db: &Db, key: &str) -> Result<Option<String>, sqlx::Error> {
-    let row = sqlx::query_scalar::<_, serde_json::Value>("SELECT value FROM settings WHERE key = $1")
-        .bind(key)
-        .fetch_optional(db)
-        .await?;
+    let row =
+        sqlx::query_scalar::<_, serde_json::Value>("SELECT value FROM settings WHERE key = $1")
+            .bind(key)
+            .fetch_optional(db)
+            .await?;
     Ok(row.map(|v| json_to_string(&v)))
 }
 

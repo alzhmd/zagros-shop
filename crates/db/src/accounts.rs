@@ -76,14 +76,12 @@ pub async fn store_otp(
     code_hash: &str,
     expires_at: DateTime<Utc>,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        "INSERT INTO otp_codes (mobile, code_hash, expires_at) VALUES ($1, $2, $3)",
-    )
-    .bind(mobile)
-    .bind(code_hash)
-    .bind(expires_at)
-    .execute(db)
-    .await?;
+    sqlx::query("INSERT INTO otp_codes (mobile, code_hash, expires_at) VALUES ($1, $2, $3)")
+        .bind(mobile)
+        .bind(code_hash)
+        .bind(expires_at)
+        .execute(db)
+        .await?;
     Ok(())
 }
 
@@ -157,7 +155,11 @@ pub async fn list_addresses(db: &Db, user_id: Uuid) -> Result<Vec<Address>, sqlx
     .await
 }
 
-pub async fn find_address(db: &Db, user_id: Uuid, id: Uuid) -> Result<Option<Address>, sqlx::Error> {
+pub async fn find_address(
+    db: &Db,
+    user_id: Uuid,
+    id: Uuid,
+) -> Result<Option<Address>, sqlx::Error> {
     sqlx::query_as::<_, Address>("SELECT * FROM addresses WHERE id = $1 AND user_id = $2")
         .bind(id)
         .bind(user_id)
@@ -298,14 +300,12 @@ pub async fn create_link_code(
         .bind(user_id)
         .execute(&mut *tx)
         .await?;
-    sqlx::query(
-        "INSERT INTO telegram_link_codes (code, user_id, expires_at) VALUES ($1, $2, $3)",
-    )
-    .bind(code)
-    .bind(user_id)
-    .bind(expires_at)
-    .execute(&mut *tx)
-    .await?;
+    sqlx::query("INSERT INTO telegram_link_codes (code, user_id, expires_at) VALUES ($1, $2, $3)")
+        .bind(code)
+        .bind(user_id)
+        .bind(expires_at)
+        .execute(&mut *tx)
+        .await?;
     tx.commit().await?;
     Ok(())
 }
@@ -356,13 +356,12 @@ pub async fn consume_link_code(
         .bind(code)
         .execute(&mut *tx)
         .await?;
-    let user = sqlx::query_as::<_, User>(
-        "UPDATE users SET telegram_id = $1 WHERE id = $2 RETURNING *",
-    )
-    .bind(telegram_id)
-    .bind(user_id)
-    .fetch_one(&mut *tx)
-    .await?;
+    let user =
+        sqlx::query_as::<_, User>("UPDATE users SET telegram_id = $1 WHERE id = $2 RETURNING *")
+            .bind(telegram_id)
+            .bind(user_id)
+            .fetch_one(&mut *tx)
+            .await?;
 
     tx.commit().await?;
     Ok(LinkOutcome::Linked(user))

@@ -90,7 +90,10 @@ pub struct ProductAttrRow {
     pub value: String,
 }
 
-pub async fn product_attr_rows(db: &Db, product_id: Uuid) -> Result<Vec<ProductAttrRow>, sqlx::Error> {
+pub async fn product_attr_rows(
+    db: &Db,
+    product_id: Uuid,
+) -> Result<Vec<ProductAttrRow>, sqlx::Error> {
     sqlx::query_as::<_, ProductAttrRow>(
         "SELECT pa.attribute_id, a.name, pa.value
          FROM product_attributes pa JOIN attributes a ON a.id = pa.attribute_id

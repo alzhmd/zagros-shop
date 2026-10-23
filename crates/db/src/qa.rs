@@ -146,7 +146,10 @@ pub struct AdminQuestionRow {
     pub created_at: DateTime<Utc>,
 }
 
-pub async fn list_all(db: &Db, status_filter: Option<&str>) -> Result<Vec<AdminQuestionRow>, sqlx::Error> {
+pub async fn list_all(
+    db: &Db,
+    status_filter: Option<&str>,
+) -> Result<Vec<AdminQuestionRow>, sqlx::Error> {
     let base = r#"
         SELECT q.id, q.product_id, p.name AS product_name, p.slug AS product_slug,
                q.author_name, q.body, q.status,

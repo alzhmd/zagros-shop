@@ -116,15 +116,13 @@ pub async fn create(
     user_agent: Option<&str>,
     ip: Option<&str>,
 ) -> Result<(), sqlx::Error> {
-    sqlx::query(
-        "INSERT INTO user_sessions (token, user_id, user_agent, ip) VALUES ($1,$2,$3,$4)",
-    )
-    .bind(token)
-    .bind(user_id)
-    .bind(user_agent)
-    .bind(ip)
-    .execute(db)
-    .await?;
+    sqlx::query("INSERT INTO user_sessions (token, user_id, user_agent, ip) VALUES ($1,$2,$3,$4)")
+        .bind(token)
+        .bind(user_id)
+        .bind(user_agent)
+        .bind(ip)
+        .execute(db)
+        .await?;
     Ok(())
 }
 

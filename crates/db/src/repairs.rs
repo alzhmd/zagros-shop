@@ -124,7 +124,10 @@ pub async fn list_for_user(db: &Db, user_id: Uuid) -> Result<Vec<RepairRequest>,
     .await
 }
 
-pub async fn list_all(db: &Db, status_filter: Option<&str>) -> Result<Vec<RepairRequest>, sqlx::Error> {
+pub async fn list_all(
+    db: &Db,
+    status_filter: Option<&str>,
+) -> Result<Vec<RepairRequest>, sqlx::Error> {
     match status_filter {
         Some(s) => {
             sqlx::query_as::<_, RepairRequest>(

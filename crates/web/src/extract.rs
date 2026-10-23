@@ -32,7 +32,10 @@ impl FromRequestParts<AppState> for CurrentUser {
                         .flatten()
                 };
                 match uid {
-                    Some(uid) => db::accounts::find_by_id(&state.db, uid).await.ok().flatten(),
+                    Some(uid) => db::accounts::find_by_id(&state.db, uid)
+                        .await
+                        .ok()
+                        .flatten(),
                     None => None,
                 }
             }
@@ -64,4 +67,3 @@ impl FromRequestParts<AppState> for AdminUser {
         }
     }
 }
-

@@ -51,7 +51,9 @@ pub fn parse_digits(s: &str) -> Result<i64, String> {
     if normalized.is_empty() {
         return Err("عدد نامعتبر است.".into());
     }
-    normalized.parse::<i64>().map_err(|_| "عدد خیلی بزرگ است.".into())
+    normalized
+        .parse::<i64>()
+        .map_err(|_| "عدد خیلی بزرگ است.".into())
 }
 
 #[cfg(test)]

@@ -40,7 +40,9 @@ pub async fn header(
     // شمار اعلان‌های خوانده‌نشده (فقط برای کاربر واردشده).
     let unread_fa = match &user {
         Some(u) => {
-            let n = db::notifications::unread_count(&s.db, u.id).await.unwrap_or(0);
+            let n = db::notifications::unread_count(&s.db, u.id)
+                .await
+                .unwrap_or(0);
             if n > 0 {
                 Some(crate::filters::to_fa_digits(&n.to_string()))
             } else {
@@ -89,10 +91,7 @@ struct CartMini {
 }
 
 /// نشانگر سبد (آیکن داخل لینک سبد در هدر).
-pub async fn cart_mini(
-    State(s): State<AppState>,
-    jar: SignedCookieJar,
-) -> AppResult<Html<String>> {
+pub async fn cart_mini(State(s): State<AppState>, jar: SignedCookieJar) -> AppResult<Html<String>> {
     let cart_count = match jar.get(CART_COOKIE).map(|c| c.value().to_string()) {
         Some(key) => match db::cart::find_cart(&s.db, &key).await? {
             Some(cart_id) => db::cart::item_count(&s.db, cart_id).await?,

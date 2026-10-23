@@ -53,9 +53,9 @@ fn strip_command<'a>(text: &'a str, name: &str) -> Option<&'a str> {
 
 async fn welcome_text(db: &Db, telegram_id: i64) -> String {
     match accounts::find_by_telegram_id(db, telegram_id).await {
-        Ok(Some(_)) => format!(
-            "سلام! حساب شما به ربات متصل است. ✅\n\nبرای دیدن امتیاز /points را بزنید."
-        ),
+        Ok(Some(_)) => {
+            format!("سلام! حساب شما به ربات متصل است. ✅\n\nبرای دیدن امتیاز /points را بزنید.")
+        }
         _ => HELP.to_string(),
     }
 }
@@ -145,7 +145,10 @@ mod tests {
     #[test]
     fn group_mention_form() {
         // فرم گروهی «/start@botname» باید پشتیبانی شود.
-        assert_eq!(strip_command("/start@znjzagrosbot CODE", "start"), Some("CODE"));
+        assert_eq!(
+            strip_command("/start@znjzagrosbot CODE", "start"),
+            Some("CODE")
+        );
         assert_eq!(strip_command("/help@znjzagrosbot", "help"), Some(""));
     }
 
