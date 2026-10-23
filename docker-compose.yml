@@ -1,0 +1,29 @@
+# Local DEVELOPMENT database only — not for production.
+# The credentials are the app's built-in defaults (crates/web/src/config.rs), so this works with no configuration:
+#
+#   docker compose up -d db
+#   cargo run -p web
+#
+# Port 5432 already in use?   ZAGROS_DB_PORT=5433 docker compose up -d db
+#   then run the app with     ZAGROS__DATABASE__URL=postgres://zagros:zagros_dev_2026@127.0.0.1:5433/zagros
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: zagros
+      POSTGRES_PASSWORD: zagros_dev_2026
+      POSTGRES_DB: zagros
+    ports:
+      # bound to localhost only
+      - "127.0.0.1:${ZAGROS_DB_PORT:-5432}:5432"
+    volumes:
+      - zagros-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zagros -d zagros"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  zagros-pgdata:

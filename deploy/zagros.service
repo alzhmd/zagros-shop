@@ -23,7 +23,7 @@ WorkingDirectory=/opt/zagros
 ExecStart=/opt/zagros/web
 
 # پیکربندی از فایل محیطی (راز‌ها اینجا، خارج از مخزن):
-#   /opt/zagros/zagros.env شامل ZAGROS__SERVER__COOKIE_SECRET، ZAGROS__TELEGRAM__TOKEN، DATABASE_URL، ...
+#   /opt/zagros/zagros.env شامل ZAGROS__SERVER__COOKIE_SECRET، ZAGROS__DATABASE__URL، ZAGROS__TELEGRAM__TOKEN، ... (الگو: deploy/zagros.env.example)
 EnvironmentFile=/opt/zagros/zagros.env
 Environment=RUST_LOG=info,sqlx=warn
 
