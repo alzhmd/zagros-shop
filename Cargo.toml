@@ -27,7 +27,7 @@ tower-http = { version = "0.6", features = ["fs", "compression-br", "compression
 hyper = "1"
 
 # --- Database (Postgres, compile-time checked) ---
-sqlx = { version = "0.8", default-features = false, features = [
+sqlx = { version = "0.9", default-features = false, features = [
     "runtime-tokio", "tls-rustls-ring-webpki", "postgres",
     "macros", "migrate", "chrono", "uuid", "json", "rust_decimal",
 ] }
