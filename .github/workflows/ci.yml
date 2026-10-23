@@ -82,7 +82,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: apply every migration in order
         run: |
-          for f in $(ls migrations/*.sql | sort); do
+          for f in migrations/*.sql; do   # the shell sorts globs, and the files are zero-padded
             echo "::group::$f"
             psql -v ON_ERROR_STOP=1 -q -f "$f"
             echo "::endgroup::"
