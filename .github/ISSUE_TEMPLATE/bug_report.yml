@@ -1,0 +1,42 @@
+name: Bug report
+description: Something did not work as expected
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you do, what did you expect, what happened instead? Screenshots of the page help.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open /...
+        2. Click ...
+        3. See the error
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where does it happen?
+      options: [Storefront, Account / checkout / payment, Repairs / tickets / live chat, Admin panel, Telegram bot, Build / deployment, Not sure]
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Version / commit
+      placeholder: "0.1.0 or a commit hash"
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      placeholder: "Ubuntu 24.04, Rust 1.88, PostgreSQL 16, behind nginx"
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant log lines
+      description: "`journalctl -u zagros` or the terminal output of `cargo run`. Remove secrets, tokens and customers' phone numbers first."
+      render: text
