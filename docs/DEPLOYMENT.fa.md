@@ -1,9 +1,18 @@
 # استقرار زاگرس — جهان کولاک
 
+[English](DEPLOYMENT.md)
+
 راهنمای انتشار نسخه‌ی تولید. اپ یک باینری است (وب + ورکر + ربات تلگرام در یک پروسه).
 
 ## ۱) پیش‌نیازها روی سرور
-- PostgreSQL 16 (نصب‌شده، دیتابیس و کاربر `zagros`).
+- PostgreSQL 16. یک بار با کاربر `postgres` دیتابیس و کاربر برنامه را بسازید:
+
+  ```bash
+  sudo -u postgres psql -c "CREATE USER zagros WITH PASSWORD 'CHANGE_ME';"
+  sudo -u postgres psql -c "CREATE DATABASE zagros OWNER zagros;"
+  ```
+
+  migrationها خودشان extensionهای لازم (`pg_trgm`، `unaccent`، `uuid-ossp`) را می‌سازند؛ این سه «trusted» هستند و کاربر عادی `zagros` هم می‌تواند.
 - nginx (به‌عنوان reverse proxy / TLS).
 - (اختیاری) دامنه + گواهی TLS ��ز certbot.
 
@@ -29,7 +38,7 @@ cargo build --release -p web
 ├─ assets/             # CSS، فونت، JS (همه لوکال، بدون CDN)
 ├─ config/
 │  └─ config.toml      # تنظیمات غیرمحرمانه
-├─ migrations/         # SQL — هنگام اجرا خودکار اعمال می‌شود
+├─ migrations/         # SQL — داخل باینری هم توکار است و هنگام اجرا خودکار اعمال می‌شود
 └─ zagros.env          # رازها (خارج از مخزن) — مرحله‌ی بعد
 ```
 
@@ -43,7 +52,7 @@ sudo chown -R zagros:zagros /opt/zagros
 
 ## ۴) فایل محیطی رازها (`/opt/zagros/zagros.env`)
 ```ini
-DATABASE_URL=postgres://zagros:CHANGE_ME@127.0.0.1:5432/zagros
+ZAGROS__DATABASE__URL=postgres://zagros:CHANGE_ME@127.0.0.1:5432/zagros
 # secret کوکی: یک رشته‌ی تصادفی ۶۴+ کاراکتری (مثلاً: openssl rand -hex 48)
 ZAGROS__SERVER__COOKIE_SECRET=CHANGE_ME_LONG_RANDOM
 ZAGROS__SERVER__BASE_URL=https://zagros.example.ir
@@ -59,6 +68,10 @@ ZAGROS__SMS__TEMPLATE=zagros-otp
 ZAGROS__TELEGRAM__ENABLED=true
 ZAGROS__TELEGRAM__TOKEN=xxxxxxxxx:yyyyyyyyyyyyyyyyyyyy
 ```
+
+> ⚠️ راز کوکی و رمز دیتابیسِ پیش‌فرضِ داخل کد **عمومی** هستند: اگر `ZAGROS__SERVER__COOKIE_SECRET` را نگذارید برنامه باز هم بالا می‌آید، ولی با کلیدی که همه می‌شناسند.
+> متغیر `DATABASE_URL` خوانده **نمی‌شود**؛ نام درست `ZAGROS__DATABASE__URL` است. الگوی کامل: `deploy/zagros.env.example`.
+
 ```bash
 sudo chown zagros:zagros /opt/zagros/zagros.env
 sudo chmod 600 /opt/zagros/zagros.env
