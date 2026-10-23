@@ -52,7 +52,7 @@ fn group_digits_fa(n: i64) -> String {
     let mut out = String::new();
     let len = digits.len();
     for (i, d) in digits.iter().enumerate() {
-        if i > 0 && (len - i) % 3 == 0 {
+        if i > 0 && (len - i).is_multiple_of(3) {
             out.push('٬');
         }
         // تبدیل رقم لاتین به فارسی

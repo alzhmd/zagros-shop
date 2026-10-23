@@ -31,7 +31,7 @@ impl CartItemView {
     }
     /// آیا این قلم تخفیف دارد؟
     pub fn has_discount(&self) -> bool {
-        self.compare_at_price.map_or(false, |c| c > self.unit_price)
+        self.compare_at_price.is_some_and(|c| c > self.unit_price)
     }
     /// مجموع قیمت قبل از تخفیف برای این خط (برای نمایش پس‌انداز).
     pub fn compare_line_fa(&self) -> String {

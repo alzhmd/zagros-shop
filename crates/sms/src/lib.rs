@@ -17,6 +17,7 @@ pub struct SmsReceipt {
 
 /// رابط مشترک ارسال کد یکبارمصرف. کد در اپ تولید/منقضی می‌شود؛
 /// آداپتور فقط آن را در قالب از پیش‌تأییدشده تزریق می‌کند.
+#[allow(clippy::double_must_use)] // تولید async_trait: Future از قبل must_use است
 #[async_trait]
 pub trait SmsSender: Send + Sync {
     async fn send_otp(&self, mobile: &str, code: &str) -> Result<SmsReceipt, SmsError>;

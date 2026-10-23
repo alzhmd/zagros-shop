@@ -176,6 +176,7 @@ pub struct OrderDiscount {
 }
 
 /// ساخت سفارش از روی سبد، با کاهش موجودی، در یک تراکنش اتمیک.
+#[allow(clippy::too_many_arguments)] // یک insert اتمیک؛ struct پارامتر فقط فهرست را جابه‌جا می‌کرد
 pub async fn create_from_cart(
     db: &Db,
     user_id: Option<Uuid>,

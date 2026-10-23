@@ -312,7 +312,7 @@ pub async fn create_link_code(
 
 /// نتیجه‌ی تلاش برای اتصال حساب از طریق کد.
 pub enum LinkOutcome {
-    Linked(User),
+    Linked(Box<User>),
     AlreadyLinkedToOther,
     InvalidOrExpired,
 }
@@ -364,5 +364,5 @@ pub async fn consume_link_code(
             .await?;
 
     tx.commit().await?;
-    Ok(LinkOutcome::Linked(user))
+    Ok(LinkOutcome::Linked(Box::new(user)))
 }

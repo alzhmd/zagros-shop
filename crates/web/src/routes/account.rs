@@ -268,15 +268,11 @@ pub async fn dashboard(
     if user
         .full_name
         .as_deref()
-        .map_or(false, |v| !v.trim().is_empty())
+        .is_some_and(|v| !v.trim().is_empty())
     {
         filled += 1;
     }
-    if user
-        .email
-        .as_deref()
-        .map_or(false, |v| !v.trim().is_empty())
-    {
+    if user.email.as_deref().is_some_and(|v| !v.trim().is_empty()) {
         filled += 1;
     }
     if user.birthdate.is_some() {

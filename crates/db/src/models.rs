@@ -63,7 +63,7 @@ impl ProductVariant {
     }
     /// آیا این تنوع تخفیف دارد؟
     pub fn has_discount(&self) -> bool {
-        self.compare_at_price.map_or(false, |c| c > self.price)
+        self.compare_at_price.is_some_and(|c| c > self.price)
     }
     /// قیمت قبل از تخفیف قالب‌بندی‌شده.
     pub fn compare_at_fa(&self) -> String {
@@ -122,7 +122,7 @@ impl ProductCard {
     }
     /// آیا تخفیف دارد؟
     pub fn has_discount(&self) -> bool {
-        self.compare_at.map_or(false, |c| c > self.sell_price())
+        self.compare_at.is_some_and(|c| c > self.sell_price())
     }
     /// قیمت قبل از تخفیف قالب‌بندی‌شده.
     pub fn compare_at_fa(&self) -> String {

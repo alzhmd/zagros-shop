@@ -104,18 +104,11 @@ impl Default for PaymentConfig {
     }
 }
 
-#[derive(Debug, Clone, Deserialize)]
+/// توکن از طریق ENV/config داده می‌شود؛ پیش‌فرض (`Default`) خاموش و بدون توکن است.
+#[derive(Debug, Clone, Default, Deserialize)]
 pub struct TelegramConfig {
     pub token: String,
     pub enabled: bool,
-}
-impl Default for TelegramConfig {
-    fn default() -> Self {
-        Self {
-            token: String::new(),
-            enabled: false, // توکن از طریق ENV/config داده می‌شود؛ پیش‌فرض خاموش
-        }
-    }
 }
 
 impl Settings {

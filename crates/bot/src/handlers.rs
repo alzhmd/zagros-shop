@@ -54,7 +54,7 @@ fn strip_command<'a>(text: &'a str, name: &str) -> Option<&'a str> {
 async fn welcome_text(db: &Db, telegram_id: i64) -> String {
     match accounts::find_by_telegram_id(db, telegram_id).await {
         Ok(Some(_)) => {
-            format!("سلام! حساب شما به ربات متصل است. ✅\n\nبرای دیدن امتیاز /points را بزنید.")
+            "سلام! حساب شما به ربات متصل است. ✅\n\nبرای دیدن امتیاز /points را بزنید.".to_string()
         }
         _ => HELP.to_string(),
     }
